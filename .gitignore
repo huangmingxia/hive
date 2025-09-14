@@ -34,3 +34,7 @@ config/apiserver/certificates/**
 *.swo
 *~
 /_output/
+
+# AI Assistant
+.ai_test_generation_assistant/temp_repos
+.ai_test_generation_assistant/workflow_outputs

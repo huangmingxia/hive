@@ -1,0 +1,108 @@
+# Test Case Accuracy Rules - Universal Intelligence Guidelines
+# Universal test case accuracy rules applicable to all components and scenarios
+
+# Core Intelligence Principles
+core_intelligence_principles:
+  
+  context_awareness:
+    principle: "Deeply understand the real context and purpose of JIRA tickets"
+    application: "Analyze status, labels, and dependencies to determine actual testing needs"
+  
+  realistic_scope:
+    principle: "Generate tests that QE engineers can execute in real environments"
+    application: "Avoid test scenarios requiring special privileges or complex infrastructure"
+  
+  user_workflow_focus:
+    principle: "Focus on actual end-user workflows"
+    application: "Test operations users truly execute, not system internal or development-level operations"
+  
+  component_intelligence:
+    principle: "Intelligently select appropriate testing methods based on component characteristics"
+    application: "Understand core functionality and typical use cases of different components"
+
+# Intelligent Analysis Dimensions
+intelligent_analysis_dimensions:
+  
+  issue_maturity_assessment:
+    guideline: "Judge feature maturity based on issue status and history"
+    impact_on_testing: "Mature features focus on validation, new features focus on basic testing"
+  
+  stakeholder_identification:
+    guideline: "Identify who owns this feature and who will use it"
+    impact_on_testing: "QE labels mean validation-oriented, dev labels mean functionality-oriented"
+  
+  dependency_understanding:
+    guideline: "Understand technical dependencies and prerequisites"
+    impact_on_testing: "Blocked tickets usually mean dependencies resolved, focus on core functionality"
+  
+  scope_boundary_recognition:
+    guideline: "Identify reasonable testing boundaries and limitations"
+    impact_on_testing: "Distinguish user-level operations from system administrator operations"
+
+# Test Scenario Filtering Guidance
+test_scenario_filtering_guidance:
+  
+  feasibility_assessment:
+    consider: "Is the test executable in standard QE environments"
+    evaluate: "Required permissions, tools, environment complexity"
+  
+  value_alignment:
+    consider: "Does the test verify real user value"
+    evaluate: "Does it test functionality that will actually be used"
+  
+  maintenance_cost:
+    consider: "Is the test easy to maintain and repeatedly execute"
+    evaluate: "Are external dependencies stable and controllable"
+
+# Intelligent Judgment Prompts
+intelligent_judgment_prompts:
+  
+  when_analyzing_closed_issues:
+    think: "Feature is implemented, what do I need to validate?"
+    focus: "User experience, integration effects, stability"
+  
+  when_analyzing_feature_gates:
+    think: "How is this feature used by end users?"
+    focus: "Feature availability, not enablement process"
+  
+  when_analyzing_dependencies:
+    think: "After prerequisites are resolved, what can users do?"
+    focus: "Actual feature usage, not dependency resolution process"
+  
+  when_analyzing_qe_only_labels:
+    think: "What quality attributes does QE need to validate?"
+    focus: "Validation of existing functionality, not new feature development"
+
+# Universal Anti-Patterns
+universal_anti_patterns:
+  
+  infrastructure_operations:
+    description: "Avoid testing infrastructure-level operations"
+    examples: "Cluster installation, feature gate enablement, cloud platform configuration"
+  
+  privileged_operations:
+    description: "Avoid operations requiring special privileges"
+    examples: "Cluster admin operations, system-level configuration, security policy modifications"
+  
+  development_artifacts:
+    description: "Avoid testing temporary states in development process"
+    examples: "Code compilation, unit testing, development debugging scenarios"
+  
+  unrealistic_scenarios:
+    description: "Avoid scenarios difficult to reproduce in QE environments"
+    examples: "Complex multi-cluster setups, production-level loads, special hardware requirements"
+
+# Adaptive Intelligence Guidance
+adaptive_intelligence_guidance:
+  
+  component_adaptation:
+    principle: "Adjust testing focus based on component characteristics"
+    method: "Understand core value and main use cases of components"
+  
+  context_adaptation:
+    principle: "Adjust testing depth based on issue context"
+    method: "Analyze issue urgency, impact scope, user groups"
+  
+  environment_adaptation:
+    principle: "Adjust testing methods based on test environment limitations"
+    method: "Consider QE environment tools, permissions, resource constraints"
