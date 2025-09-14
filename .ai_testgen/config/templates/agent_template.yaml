@@ -1,0 +1,155 @@
+# Standard Agent YAML Schema Template
+# This template defines the complete structure for AI TestGen agents
+
+agent:
+  name: "agent_name"  # Unique identifier for the agent
+  display_name: "Agent Display Name"  # Human-readable name (optional)
+  description: "Brief description of what this agent does"
+
+role:  # Agent's role and responsibilities (optional)
+  title: "Role Title"  # e.g., "Hive QE", "OpenShift QE"
+  specialization: "Area of specialization"  # (optional)
+  responsibility: "Detailed responsibilities for this agent"
+
+prerequisite_check:  # Pre-execution validation (optional)
+  description: "What prerequisites are being checked"
+  validation_steps:
+    - "Step 1: Check condition A"
+    - "Step 2: Check condition B"
+  failure_action:
+    - "Action to take if prerequisites not met"
+    - "Alternative approaches or error messages"
+
+task:  # Core task definition (required)
+  primary_goal: "Main objective of this agent"
+  goal: "Detailed goal description"  # (optional, alternative to primary_goal)
+
+  # For simple agents - direct execution steps
+  steps:
+    - "Step 1: Description of what to do"
+    - "Step 2: Description of next action"
+    - "Step 3: Final step description"
+
+  # For complex agents - subtasks with dependencies
+  subtasks:
+    - name: "Subtask Name"
+      description: "What this subtask accomplishes"
+      dependencies: ["Previous Subtask Name"]  # (optional)
+      condition: "When this subtask should execute"  # (optional)
+      steps:
+        - "Subtask step 1"
+        - "Subtask step 2"
+      success_criteria:
+        - "How to verify this subtask completed successfully"
+
+  # Execution enforcement rules (optional)
+  execution_enforcement:
+    - "CRITICAL: Important rule that must be followed"
+    - "MANDATORY: Required behavior"
+    - "FORBIDDEN: Prohibited actions"
+
+input:  # Input parameters (required)
+  required:
+    - name: "parameter_name"
+      type: "string"  # string, file, number, boolean
+      description: "What this parameter is for"
+      example: "HIVE-2883"
+    - name: "another_param"
+      type: "string"
+      description: "Another required parameter"
+      example: "hive"
+
+  optional:
+    - name: "optional_param"
+      type: "string"
+      description: "Optional parameter description"
+      example: "default_value"
+      default: "default_value"
+
+output:  # Output specifications (required)
+  files:
+    - name: "output_file_name.ext"
+      path: "relative/path/to/{COMPONENT}/{JIRA_KEY}/output_file_name.ext"
+      format: "markdown"  # yaml, markdown, text, json
+      description: "What this file contains"
+      content:
+        - "Description of expected content section 1"
+        - "Description of expected content section 2"
+      template: "config/templates/template_file.yaml"  # (optional)
+      condition: "When this file should be generated"  # (optional)
+
+tools:  # Available tools for this agent (required)
+  - name: "Tool Name 1"
+    description: "What this tool is used for"
+  - name: "Tool Name 2"
+    description: "Purpose of this tool"
+
+content_limits:  # Content constraints (optional)
+  maximum_size: "15KB"  # Size limits
+  style_guidelines:
+    - "Style rule 1"
+    - "Style rule 2"
+    - "Formatting requirement"
+
+violation_detection:  # Quality control (optional)
+  prohibited_phrases:
+    - "forbidden phrase 1"
+    - "forbidden phrase 2"
+  required_evidence:
+    - "Must provide evidence of X"
+    - "Must show proof of Y"
+
+execution_hierarchy:  # Execution priority levels (optional)
+  primary: "Most important execution rule"
+  secondary: "Secondary priority rule"
+  tertiary: "Fallback approach"
+  forbidden: "Actions that are not allowed"
+
+auto_fix_enforcement:  # For test execution agents (optional)
+  mandatory_triggers:
+    - "When auto-fix must be attempted"
+  prohibited_skip_reasons:
+    - "Cannot skip auto-fix for this reason"
+  required_actions:
+    - "Must perform this action"
+  failure_classification_matrix:
+    test_code_issue:
+      indicators: ["error patterns"]
+      action: "How to fix"
+    environment_issue:
+      indicators: ["env error patterns"]
+      action: "Environment fix approach"
+    product_bug:
+      indicators: ["product failure patterns"]
+      action: "Bug reporting process"
+
+configuration:  # Agent configuration settings (optional)
+  dynamic_variables:
+    - "{COMPONENT}"
+    - "{JIRA_KEY}"
+    - "{jira_issue_key}"
+  template_replacement: true  # Enable variable replacement
+  template_enforcement: "strict"  # strict, lenient
+  execution_timeout: 3600  # Timeout in seconds
+
+  performance_optimization:  # Performance settings (optional)
+    target_execution_time: "60-90 seconds"
+    balance: "Quality vs Speed balance description"
+    critical_performance_rules:
+      parallel_execution_mandatory:
+        - "Rule for parallel execution"
+      fast_mode_default:
+        - "Fast mode settings"
+      execution_strategies:
+        - "Execution optimization strategy"
+    performance_targets:
+      - "Step 1: target time"
+      - "Step 2: target time"
+    output_efficiency:
+      - "Output optimization rule"
+
+# For orchestrator agents that coordinate other agents
+execution_flow:
+  - "MANDATORY: Execute agent_x for {jira_issue_key}"
+  - "MANDATORY: Execute agent_y for {jira_issue_key}"
+  - "MANDATORY: Execute agent_z for {jira_issue_key}"

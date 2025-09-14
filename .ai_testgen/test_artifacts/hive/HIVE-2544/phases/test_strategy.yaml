@@ -1,0 +1,12 @@
+test_coverage_matrix:
+  - "Positive test case: Register a valid UDF and use it in a simple query."
+  - "Negative test case: Attempt to register an invalid UDF (e.g., non-existent class) and verify a graceful failure."
+  - "Edge case: Register a UDF with a name that is already in use."
+test_scenarios:
+  - "Scenario 1: Register a single valid UDF and use it in a SELECT statement."
+  - "Scenario 2: Attempt to register a UDF with a class that does not exist."
+  - "Scenario 3: Attempt to register a UDF with a name that is already registered."
+validation_methods:
+  - "For Scenario 1, the query using the UDF should execute successfully and return the expected result."
+  - "For Scenario 2, Hive should return a specific error message indicating the class was not found."
+  - "For Scenario 3, Hive should return a specific error message indicating the function name is already in use."

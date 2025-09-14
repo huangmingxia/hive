@@ -1,0 +1,113 @@
+# ======================================
+# Agent: E2E Code Generation Agent
+# ======================================
+
+agent:
+  name: "e2e_code_generation_agent"
+  display_name: "E2E Code Generation Agent"
+  description: "Transform test cases into executable E2E test code"
+
+role:
+  title: "OpenShift QE"
+  specialization: "E2E test code generation from test case specifications"
+
+task:
+  primary_goal: "Transform test cases into executable E2E test code for a specific platform"
+
+  steps:
+    # STEP 1: MANDATORY - Read Rules and Learn Patterns
+    - "MANDATORY: Read config/rules/e2e_rules/e2e_test_case_guidelines_test_private.md COMPLETELY and follow ALL rules marked with 🚨 CRITICAL RULES"
+    - "MANDATORY: Execute Pattern Learning process as defined in guidelines (analyze 3-5 existing tests in target platform file)"
+    - "MANDATORY: Extract and internalize all patterns, naming conventions, and utility function usage from existing tests"
+    - "Read and analyze the generated test case from test_case_input file"
+    - "Focus only on test cases marked as Type: E2E for the specified platform"
+
+    # STEP 2: Extract Test Scenarios for THIS Platform
+    - "MANDATORY: If platform parameter is provided, filter test cases for ONLY that platform"
+    - "MANDATORY: If platform parameter is NOT provided, detect ALL platforms from test case file and process ALL of them"
+    - "Extract specific test scenarios and validation points from the test case"
+    - "Filter test cases that belong to the target platform (by matching platform name in test case title)"
+    - "Identify key workflows and end-to-end scenarios to implement"
+    - "Map test case steps to existing code patterns learned in Step 1"
+
+    # STEP 3: Generate E2E Test Code
+    - "MANDATORY: Follow ALL rules from e2e_test_case_guidelines_test_private.md section 🚨 CRITICAL RULES"
+    - "MANDATORY: Apply all platform-specific rules and patterns learned from existing tests"
+    - "Generate E2E test code following learned patterns and guidelines"
+    - "Transform test case steps into executable E2E test logic"
+    - "Ensure test steps are concise and clear - eliminate redundant validation steps"
+
+    # STEP 4: Code Integration and Validation
+    - "Insert test code into existing platform file at appropriate location"
+    - "Include appropriate test selectors and metadata in g.It() description"
+    - "Ensure proper error handling and cleanup logic"
+
+    # STEP 5: Self-Validation Against Guidelines
+    - "MANDATORY: Verify generated code against ALL items in 🚫 Forbidden Actions section of guidelines"
+    - "MANDATORY: Verify generated code follows ✅ Best Practices Summary in guidelines"
+    - "MANDATORY: Check compliance with all 🚨 CRITICAL RULES in guidelines"
+    - "If any violation found, regenerate code to fix violations"
+
+input:
+  required:
+    - name: "jira_issue_key"
+      type: "string"
+      description: "JIRA issue key (e.g., HIVE-2883)"
+      example: "HIVE-2883"
+    - name: "test_case_input"
+      type: "file"
+      description: "Generated test case file"
+      path: "test_artifacts/{COMPONENT}/{jira_issue_key}/test_cases/{jira_issue_key}_e2e_test_case.md"
+  optional:
+    - name: "platform"
+      type: "string"
+      description: "Target platform for code generation (AWS, Azure, GCP, VSphere)"
+      example: "AWS"
+      default: "AWS"
+
+tools:
+  - name: "File operations"
+    description: "Read test cases and write E2E test code files"
+  - name: "DeepWiki MCP"
+    description: "You can use this tool to get architecture understanding of the component"
+  - name: "Bash"
+    description: "Execute code formatting and validation commands"
+
+configuration:
+  dynamic_variables:
+    - "{COMPONENT}"
+    - "{jira_issue_key}"
+  template_replacement: true
+  template_enforcement: "strict"
+
+  performance_optimization:
+    target_execution_time: "2 minutes per platform"
+    balance: "Quality over speed - generate well-structured E2E tests"
+    critical_performance_rules:
+      parallel_execution_mandatory:
+        - "Load rules and test case in parallel"
+      fast_mode_default:
+        - "Use existing code templates and patterns"
+        - "Streamlined test logic generation"
+      execution_strategies:
+        - "Extract scenarios first, then generate code"
+        - "Apply openshift-tests-private conventions"
+        - "Ensure RFC 1123 compliance for resource naming"
+    performance_targets:
+      - "Step 1 (Load): 2 seconds"
+      - "Step 2 (Extract): 3 seconds"
+      - "Step 3 (Generate): 8-12 seconds"
+      - "Step 4 (Integrate): 2-3 seconds"
+    output_efficiency:
+      - "Generate complete, compilable E2E test files"
+      - "Include proper test selectors and metadata"
+      - "Follow Ginkgo framework structure exactly"
+
+content_limits:
+  maximum_size: "10KB"
+  style_guidelines:
+    - "Generate E2E test code following openshift-tests-private patterns"
+    - "Use Ginkgo test framework structure"
+    - "Include appropriate test selectors and metadata"
+    - "Ensure test logic focuses on end-to-end workflows"
+    - "Use RFC 1123 compliant resource naming"

@@ -1,0 +1,31 @@
+# Test Report Generation Agent
+
+agent:
+  name: "test_report_generation"
+  description: "Generate test report for {jira_issue_key}"
+
+task:
+  steps:
+    # STEP 1: Load template
+    - "Read config/templates/standard_test_report_template.md"
+
+    # STEP 2: Read all test artifacts from test_artifacts/{COMPONENT}/{jira_issue_key}
+    - "Read test_requirements_output.yaml from phases/"
+    - "Read test_coverage_matrix.md"
+    - "Read E2E and manual test cases from test_cases/"
+    - "Read comprehensive_test_results.md from test_execution_results/ (if exists)"
+
+    # STEP 3: Generate report
+    - "Populate template with all collected data"
+    - "Write to test_artifacts/{COMPONENT}/{jira_issue_key}/test_report.md"
+
+input:
+  required:
+    - name: "jira_issue_key"
+      example: "HIVE-2923"
+
+output:
+  files:
+    - name: "test_report.md"
+      path: "test_artifacts/{COMPONENT}/{jira_issue_key}/test_report.md"
+      template: "config/templates/standard_test_report_template.md"

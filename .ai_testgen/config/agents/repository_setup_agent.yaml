@@ -1,0 +1,89 @@
+# ======================================
+# Agent: Repository Setup Agent
+# ======================================
+
+agent:
+  name: "repository_setup_agent"
+  display_name: "Repository Setup Agent"
+  description: "Prepare openshift-tests-private repository for E2E test generation"
+
+role:
+  title: "OpenShift QE"
+  specialization: "Repository setup and branch management for E2E testing"
+
+task:
+  primary_goal: "Setup openshift-tests-private repository and create working branch"
+
+  steps:
+    # STEP 1: Repository Check and Clone
+    - "Check if temp_repos/openshift-tests-private exists"
+    - "If not: Clone repository fork to temp_repos/openshift-tests-private"
+    - "Navigate to repository directory"
+
+    # STEP 2: Configure Remotes
+    - "Check if upstream remote exists: git remote -v | grep upstream"
+    - "If not exists: Add upstream remote https://github.com/openshift/openshift-tests-private.git"
+
+    # STEP 3: Setup Base Commit
+    - "Use specific commit 82d71408f07a848da3ded327cd0a0a0e39cb0138 as base"
+    - "Fetch upstream with depth=1 for efficiency"
+    - "Checkout the fixed commit"
+
+    # STEP 4: Create Working Branch
+    - "Create branch ai-e2e-{jira_issue_key} from the fixed commit"
+    - "Checkout to the new branch"
+    - "Verify current branch is ai-e2e-{jira_issue_key}"
+    - "Ensure working directory is clean"
+
+input:
+  required:
+    - name: "jira_issue_key"
+      type: "string"
+      description: "JIRA issue key (e.g., HIVE-2883)"
+      example: "HIVE-2883"
+
+tools:
+  - name: "Bash"
+    description: "Execute git commands and repository operations"
+  - name: "File operations"
+    description: "Check directory existence and repository status"
+
+configuration:
+  dynamic_variables:
+    - "{COMPONENT}"
+    - "{jira_issue_key}"
+  template_replacement: true
+  template_enforcement: "strict"
+
+  performance_optimization:
+    target_execution_time: "10 seconds"
+    balance: "Setup efficiency - quick repository preparation"
+    critical_performance_rules:
+      parallel_execution_mandatory:
+        - "Check repository status efficiently"
+      fast_mode_default:
+        - "Shallow clone/fetch for speed"
+        - "Minimal branch setup operations"
+      execution_strategies:
+        - "Check existence first, clone if needed"
+        - "Configure remotes efficiently"
+        - "Use fixed commit for consistency"
+    performance_targets:
+      - "Step 1 (Check/Clone): 2 seconds"
+      - "Step 2 (Configure): 3 seconds"
+      - "Step 3 (Base Setup): 3 seconds"
+      - "Step 4 (Branch): 3 seconds"
+    output_efficiency:
+      - "Confirm repository readiness"
+      - "Document branch and commit information"
+      - "Verify clean working state"
+
+content_limits:
+  maximum_size: "3KB"
+  style_guidelines:
+    - "Check if openshift-tests-private repository exists"
+    - "Clone repository if not present"
+    - "Configure upstream remote"
+    - "Checkout fixed commit 82d71408f07a848da3ded327cd0a0a0e39cb0138"
+    - "Create and checkout ai-e2e-{jira_issue_key} branch"
+    - "Verify repository is ready for test generation"

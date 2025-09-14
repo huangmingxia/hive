@@ -1,0 +1,98 @@
+jira_issue_key: HIVE-2923
+component: hive
+
+# Core Problem Identification
+core_problem:
+  root_cause: "AWS changed RequestID format from 'Request ID' (with space) to 'RequestID' (no space), causing error scrubber regex to fail"
+  validation_pattern: "Pattern A: Stability Validation - Verify DNSZone status condition message remains stable across multiple reconciles"
+  single_validation_focus: "Measure DNSZone status condition message consistency when AWS returns errors"
+
+# Test Coverage Strategy
+test_coverage:
+  primary_scenarios:
+    - scenario_name: "AWS Error Message Scrubbing with Invalid Credentials"
+      description: "Verify DNSZone status condition messages properly scrub AWS RequestID and remain stable across reconciles"
+      platforms: ["AWS"]
+      cluster_types: ["Standard"]
+      test_type: "E2E"
+      validation_method: "Stability Validation - Compare status condition messages across multiple reconciles"
+      
+  edge_cases:
+    - scenario_name: "Multiple AWS API Errors with Different RequestID Formats"
+      description: "Verify scrubbing works for various AWS error types (EC2, Route53, ResourceGroupsTagging)"
+      platforms: ["AWS"]
+      test_type: "E2E"
+
+# Test Scenarios
+test_scenarios:
+  scenario_1:
+    name: "DNSZone Error Message Stability with Invalid AWS Credentials"
+    objective: "Verify AWS RequestID is properly scrubbed from DNSZone error messages and status conditions remain stable"
+    user_workflow:
+      - "User creates ClusterDeployment with managedDNS=true using invalid AWS credentials"
+      - "DNSZone controller encounters AWS authentication errors containing RequestID"
+      - "Error scrubber processes error messages before updating status conditions"
+      - "Status condition messages should be stable (identical) across multiple reconciles"
+    validation_approach: |
+      Pattern A: Stability Validation
+      - Capture DNSZone status condition message at time T1
+      - Wait for multiple reconcile cycles (controller will retry with same invalid credentials)
+      - Capture DNSZone status condition message at time T2
+      - Compare messages - they must be identical (no RequestID variance)
+      - Also verify RequestID is replaced with placeholder (not present in message)
+    
+  scenario_2:
+    name: "Error Scrubbing Across Different AWS Service Errors"
+    objective: "Verify RequestID scrubbing works for various AWS services (EC2, Route53, ResourceGroupsTagging)"
+    user_workflow:
+      - "User creates ClusterDeployment triggering various AWS API calls"
+      - "Hive controllers encounter different types of AWS errors (each with RequestID)"
+      - "Each error type should have RequestID properly scrubbed"
+    validation_approach: |
+      Pattern D: Absence Validation
+      - Trigger AWS errors from different services
+      - Examine ClusterDeployment and DNSZone status conditions
+      - Verify no UUID patterns (RequestID format) present in error messages
+      - Confirm placeholder text is used instead
+
+# Validation Methods
+validation_methods:
+  quantitative_measurements:
+    - measurement: "Status condition message consistency"
+      method: "Compare .status.conditions[?(@.type=='DNSError')].message at T1 and T2"
+      threshold: "Messages must be byte-identical (zero difference)"
+      
+    - measurement: "RequestID absence verification"
+      method: "Search status condition messages for UUID patterns"
+      threshold: "Zero UUID patterns found in any error message"
+      
+    - measurement: "Reconcile frequency stability"
+      method: "Count DNSZone resourceVersion changes over 5-minute window"
+      threshold: "Reconcile rate should match expected backoff pattern (not immediate requeues)"
+
+  validation_commands:
+    - "oc get dnszone -o jsonpath='{.status.conditions[?(@.type==\"DNSError\")].message}' # Capture at T1"
+    - "sleep 30  # Wait for multiple reconcile cycles"
+    - "oc get dnszone -o jsonpath='{.status.conditions[?(@.type==\"DNSError\")].message}' # Capture at T2"
+    - "# Compare T1 and T2 messages - must be identical"
+    - "oc get dnszone -o jsonpath='{.status.conditions[?(@.type==\"DNSError\")].message}' | grep -E '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'  # Should return empty (no UUIDs)"
+
+# Architecture Analysis Summary
+architecture_understanding:
+  component_role: "DNSZone controller manages AWS Route53 hosted zones for Hive-managed clusters"
+  error_flow: "AWS API errors → Error scrubber (controllerutils.ErrorScrub) → Status condition message → CR update"
+  thrashing_mechanism: "If RequestID not scrubbed → Message changes every reconcile → CR update triggers immediate requeue → Thrashing"
+  fix_mechanism: "Regex updated to make space optional: (request ?id:) matches both formats"
+
+# Test Environment Requirements
+test_environment:
+  prerequisites:
+    - "AWS cluster with Hive operator installed"
+    - "Ability to configure invalid AWS credentials for testing"
+    - "Access to create ClusterDeployment CRs with managedDNS"
+  
+  test_resources:
+    - "ClusterDeployment CR with managedDNS=true"
+    - "Invalid AWS credentials secret (to trigger authentication errors)"
+    - "DNSZone CR (auto-created by ClusterDeployment)"
+

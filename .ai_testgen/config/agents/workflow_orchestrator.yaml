@@ -1,0 +1,319 @@
+# ======================================
+# Agent: Workflow Orchestrator
+# ======================================
+# Top-level orchestration engine for managing multi-agent workflows
+
+agent:
+  name: "workflow_orchestrator"
+  display_name: "Workflow Orchestration Engine"
+  description: "Automatically orchestrate multi-agent workflows based on user intent"
+
+role:
+  title: "OpenShift QE Workflow Manager"
+  specialization: "Multi-agent workflow orchestration and dependency management"
+
+task:
+  primary_goal: "Parse user requests, identify workflows, and orchestrate agent execution automatically"
+
+  # ========================================
+  # WORKFLOW DEFINITIONS
+  # ========================================
+  workflows:
+    # Workflow 1: Complete Flow (Test Case → E2E → Execution → Report)
+    full_flow:
+      name: "Complete Test Generation and Execution"
+      description: "Generate test case, E2E code, run tests, and generate comprehensive test report"
+      trigger_keywords:
+        - "generate test cases and run"
+        - "complete flow for"
+        - "full test generation"
+        - "create and run tests"
+      agents:
+        - name: test_case_generation
+          config: "config/agents/test_case_generation.yaml"
+          prerequisite: null
+          skip_on_regenerate: false
+          description: "Generate test cases - E2E or Manual or both"
+        - name: e2e_test_generation_openshift_private
+          config: "config/agents/e2e_test_generation_openshift_private.yaml"
+          prerequisite: test_case_generation
+          prerequisite_check: "test_artifacts/{COMPONENT}/{JIRA_KEY}/test_cases/{JIRA_KEY}_e2e_test_case.md"
+          skip_on_regenerate: true
+          description: "Generate E2E test code"
+        - name: test-executor
+          config: "config/agents/test-executor.yaml"
+          prerequisite: e2e_test_generation_openshift_private
+          prerequisite_check: 
+            - "test_artifacts/{COMPONENT}/{JIRA_KEY}/test_cases/{JIRA_KEY}_e2e_test_case.md"
+            - "e2e test code"
+          skip_on_regenerate: true
+          description: "Execute E2E tests"
+        - name: test_report_generation
+          config: "config/agents/test_report_generation.yaml"
+          prerequisite: test-executor
+          prerequisite_check: "test_artifacts/{COMPONENT}/{JIRA_KEY}/test_execution_results/"
+          skip_on_regenerate: false
+          description: "Generate comprehensive test report with execution results, product bugs, E2E bugs, and defect statistics"
+
+    # Workflow 2: Test Case Generation Only
+    test_case_only:
+      name: "Test Case Generation Only"
+      description: "Generate Polarion test cases from JIRA"
+      trigger_keywords:
+        - "create test case"
+        - "generate test case"
+        - "test case for"
+      agents:
+        - name: test_case_generation
+          config: "config/agents/test_case_generation.yaml"
+          prerequisite: null
+          skip_on_regenerate: false
+          description: "Generate Polarion test cases"
+
+    # Workflow 2.5: Test Report Generation Only
+    test_report_only:
+      name: "Test Report Generation Only"
+      description: "Generate comprehensive test report from existing test cases and execution results"
+      trigger_keywords:
+        - "generate test report"
+        - "create test report"
+        - "test report for"
+        - "update test report"
+      agents:
+        - name: test_report_generation
+          config: "config/agents/test_report_generation.yaml"
+          prerequisite: null
+          prerequisite_check: "test_artifacts/{COMPONENT}/{JIRA_KEY}/test_cases/"
+          skip_on_regenerate: false
+          description: "Generate test report with standard template (test artifacts, product bugs, E2E bugs, risk assessment, defect statistics)"
+
+    # Workflow 3: E2E Test Generation
+    e2e_generation:
+      name: "E2E Test Generation"
+      description: "Generate E2E test code in openshift-tests-private"
+      trigger_keywords:
+        - "generate e2e"
+        - "create e2e test"
+        - "e2e code for"
+        - "generate e2e code"
+      agents:
+        - name: e2e_test_generation_openshift_private
+          config: "config/agents/e2e_test_generation_openshift_private.yaml"
+          prerequisite: test_case_generation
+          prerequisite_check: "test_artifacts/{COMPONENT}/{JIRA_KEY}/test_cases/{JIRA_KEY}_e2e_test_case.md"
+          skip_on_regenerate: true
+          description: "Generate E2E test code (orchestrator: validation → setup → generation → quality check)"
+
+    # Workflow 4: Test Execution Only
+    test_execution:
+      name: "Test Execution Only"
+      description: "Execute existing E2E tests"
+      trigger_keywords:
+        - "run e2e tests"
+        - "execute tests"
+        - "run tests for"
+      agents:
+        - name: test-executor
+          config: "config/agents/test-executor.yaml"
+          prerequisite: e2e_test_generation_openshift_private
+          prerequisite_check: "temp_repos/openshift-tests-private/test/extended/cluster_operator/{COMPONENT}/"
+          skip_on_regenerate: false
+          description: "Execute E2E tests and generate reports"
+
+    # Workflow 5: PR Submission
+    pr_submission:
+      name: "PR Submission"
+      description: "Submit E2E test code as pull request"
+      trigger_keywords:
+        - "create pr"
+        - "submit pr"
+        - "create pull request"
+        - "submit pull request"
+      agents:
+        - name: pr-submitter
+          config: "config/agents/pr-submitter.yaml"
+          prerequisite: e2e_test_generation_openshift_private
+          prerequisite_check: "temp_repos/openshift-tests-private/test/extended/cluster_operator/{COMPONENT}/"
+          skip_on_regenerate: false
+          description: "Submit PR to openshift-tests-private"
+
+    # Workflow 6: E2E + Execution
+    e2e_and_run:
+      name: "E2E Generation and Execution"
+      description: "Generate E2E code and execute tests"
+      trigger_keywords:
+        - "generate e2e and run"
+        - "create e2e and execute"
+      agents:
+        - name: e2e_test_generation_openshift_private
+          config: "config/agents/e2e_test_generation_openshift_private.yaml"
+          prerequisite: test_case_generation
+          prerequisite_check: "test_artifacts/{COMPONENT}/{JIRA_KEY}/test_cases/{JIRA_KEY}_test_case.md"
+          skip_on_regenerate: true
+          description: "Generate E2E test code"
+        - name: test-executor
+          config: "config/agents/test-executor.yaml"
+          prerequisite: e2e_test_generation_openshift_private
+          prerequisite_check: "temp_repos/openshift-tests-private/test/extended/cluster_operator/{COMPONENT}/"
+          skip_on_regenerate: true
+          description: "Execute E2E tests"
+
+  # ========================================
+  # ORCHESTRATOR EXECUTION STEPS
+  # ========================================
+  steps:
+    # STEP 1: Parse User Request
+    - "PARSE: Extract JIRA issue key from user request using regex pattern (HIVE|CCO|SPLAT)-\\d+"
+    - "PARSE: Detect REGENERATE mode by checking for keywords: 're-create', 'recreate', 're-generate', 'regenerate'"
+    - "PARSE: Convert user request to lowercase for keyword matching"
+
+    # STEP 2: Identify Workflow
+    - "MATCH: Iterate through all workflows and check trigger_keywords against user request"
+    - "MATCH: Select the workflow with the most specific keyword match"
+    - "MATCH: If no workflow matches, default to single agent execution based on context"
+    - "LOG: Output identified workflow name and description"
+
+    # STEP 3: Prerequisite Validation
+    - "VALIDATE: For each agent in the workflow sequence:"
+    - "  IF REGENERATE mode AND skip_on_regenerate=true: SKIP prerequisite check"
+    - "  ELSE IF prerequisite exists: Check if prerequisite_check file/directory exists"
+    - "  IF prerequisite missing AND NOT regenerate mode: STOP and report missing prerequisite"
+    - "  LOG: Prerequisite validation results for each agent"
+
+    # STEP 4: Execute Workflow
+    - "EXECUTE: For each agent in workflow.agents sequence:"
+    - "  STEP 4.1: Read agent YAML config from agent.config path"
+    - "  STEP 4.2: Log agent execution start: '✅ Executing agent: {agent.name}'"
+    - "  STEP 4.3: Execute ALL steps defined in the agent's YAML config"
+    - "  STEP 4.4: Verify agent completion by checking output files"
+    - "  STEP 4.5: Log agent completion: '✅ Agent {agent.name} completed'"
+    - "  IF agent fails: STOP workflow and proceed to error handling"
+
+    # STEP 5: Workflow Completion and Reporting
+    - "REPORT: Generate workflow execution summary"
+    - "REPORT: List all executed agents and their status"
+    - "REPORT: List all generated output files and their locations"
+    - "REPORT: Calculate total execution time"
+    - "LOG: '✅ Workflow {workflow.name} completed successfully'"
+
+    # STEP 6: Error Handling
+    - "ERROR: If any agent fails during execution:"
+    - "  LOG: Error details including agent name, step number, and error message"
+    - "  STOP: Halt workflow execution immediately"
+    - "  REPORT: Generate partial workflow execution report"
+    - "  SUGGEST: Provide recovery suggestions based on error type"
+
+  # ========================================
+  # REGENERATE MODE LOGIC
+  # ========================================
+  regenerate_mode:
+    detection_keywords:
+      - "re-create"
+      - "recreate"
+      - "re-generate"
+      - "regenerate"
+    behavior:
+      - "Skip prerequisite checks for agents with skip_on_regenerate=true"
+      - "Overwrite existing files without confirmation"
+      - "Force re-execution even if output already exists"
+    logging:
+      - "Log: '⚠️ REGENERATE mode activated - skipping prerequisite checks'"
+
+input:
+  required:
+    - name: "user_request"
+      type: "string"
+      description: "Natural language user request containing JIRA key and intent"
+      example: "Generate test cases and run them for HIVE-2883"
+
+output:
+  files:
+    - name: "workflow_execution_report.md"
+      path: "test_artifacts/{COMPONENT}/{JIRA_KEY}/workflow_execution_report.md"
+      format: "markdown"
+      description: "Comprehensive workflow execution report including all agent results"
+      content:
+        - "workflow_name: Name of executed workflow"
+        - "jira_issue_key: JIRA issue processed"
+        - "regenerate_mode: Boolean indicating if regenerate mode was active"
+        - "agents_executed: List of agents and their execution status"
+        - "output_files: List of all generated files"
+        - "execution_time: Total workflow execution time"
+        - "errors: Any errors encountered during execution"
+
+tools:
+  - name: "File operations"
+    description: "Read agent configs, check prerequisites, verify outputs"
+  - name: "String matching"
+    description: "Parse user requests and match keywords"
+  - name: "Bash"
+    description: "Check file existence for prerequisite validation"
+
+configuration:
+  dynamic_variables:
+    - "{COMPONENT}"
+    - "{JIRA_KEY}"
+  template_replacement: true
+  template_enforcement: "strict"
+
+  performance_optimization:
+    target_execution_time: "Depends on workflow (60s - 90min)"
+    balance: "Efficiency in orchestration, quality in agent execution"
+    critical_performance_rules:
+      parallel_execution_mandatory:
+        - "Parse and validate in parallel where possible"
+      fast_mode_default:
+        - "Quick keyword matching using lowercase comparison"
+        - "Efficient prerequisite checks using file system operations"
+      execution_strategies:
+        - "Parse request → Identify workflow → Validate prerequisites → Execute agents"
+        - "Stop immediately on any agent failure"
+        - "Generate comprehensive execution report"
+    performance_targets:
+      - "Step 1 (Parse): 1 second"
+      - "Step 2 (Identify): 1 second"
+      - "Step 3 (Validate): 2-5 seconds"
+      - "Step 4 (Execute): Depends on agents"
+      - "Step 5 (Report): 2 seconds"
+    output_efficiency:
+      - "Clear workflow identification and validation results"
+      - "Concise agent execution logs"
+      - "Comprehensive final report"
+
+content_limits:
+  maximum_size: "10KB for orchestrator logic"
+  style_guidelines:
+    - "Parse user request automatically using keyword matching"
+    - "Validate prerequisites before executing workflow"
+    - "Execute agents in sequence with full step completion"
+    - "Generate comprehensive execution reports"
+    - "Handle REGENERATE mode correctly"
+
+# ========================================
+# USAGE EXAMPLES
+# ========================================
+examples:
+  example_1:
+    user_request: "Generate test cases and run them for HIVE-2883"
+    workflow_identified: "full_flow"
+    regenerate_mode: false
+    agents_executed:
+      - test_case_generation
+      - e2e_test_generation_openshift_private
+      - test-executor
+    
+  example_2:
+    user_request: "re-create e2e test for HIVE-2883"
+    workflow_identified: "e2e_generation"
+    regenerate_mode: true
+    agents_executed:
+      - e2e_test_generation_openshift_private
+    prerequisite_checks_skipped: true
+    
+  example_3:
+    user_request: "Create PR for HIVE-2883"
+    workflow_identified: "pr_submission"
+    regenerate_mode: false
+    agents_executed:
+      - pr-submitter
+

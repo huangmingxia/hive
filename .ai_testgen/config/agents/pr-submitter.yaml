@@ -1,0 +1,58 @@
+# ======================================
+# Agent: PR Submitter
+# ======================================
+# Submits E2E test code as pull requests to openshift-tests-private
+
+agent:
+  name: "pr-submitter"
+  display_name: "E2E Pull Request Submitter"
+  description: "Create pull request for generated E2E tests"
+
+task:
+  primary_goal: "Submit E2E test code as pull request following official repository template"
+
+  steps:
+    # STEP 1: Load PR Template
+    - "MANDATORY: Read temp_repos/openshift-tests-private/.github/pull_request_template.md"
+    - "Parse template structure and identify required sections"
+    
+    # STEP 2: Load PR Submission Rules
+    - "MANDATORY: Read config/rules/pr_submission_rules.yaml"
+    - "Understand template section requirements and data sources"
+    
+    # STEP 3: Gather PR Content
+    - "Read test execution log from test_artifacts/{COMPONENT}/{jira_issue_key}/test_execution_results/{jira_issue_key}_test_execution_log.txt"
+    - "Extract last 100-200 lines showing test execution command and results"
+    - "Identify CI profile from test environment (platform type)"
+    - "Prepare PR description based on JIRA issue and test objectives"
+    
+    # STEP 4: Format PR Body Following Template
+    - "Construct PR body following exact template structure:"
+    - "  Section 1: PR Description - Brief description of test case"
+    - "  Section 2: Local test logs - Wrap in <pre> tags, include execution command and output"
+    - "  Section 3: Jenkins job link - Write 'N/A - tested locally' if not using Jenkins"
+    - "  Section 4: CI profile - Specify platform type used for testing"
+    
+    # STEP 5: Create Pull Request
+    - "Navigate to E2E test code location (temp_repos/openshift-tests-private)"
+    - "Use GitHub CLI (gh pr create) with formatted body following template"
+    - "Apply /hold status in PR body to prevent auto-merge"
+    - "Verify PR created successfully"
+
+input:
+  required:
+    - name: "jira_issue_key"
+      type: "string"
+      description: "JIRA issue key for the E2E tests"
+      example: "HIVE-2883"
+
+tools:
+  - name: "Bash (git, gh CLI)"
+    description: "Execute git and GitHub CLI commands"
+  - name: "Read"
+    description: "Read agent configs and PR submission rules"
+  - name: "Write"
+    description: "Generate PR submission reports"
+
+output:
+  description: "Created pull request with E2E test code and JIRA updated"

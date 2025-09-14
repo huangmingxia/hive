@@ -1,0 +1,121 @@
+component_name: hive
+jira_issue_key: HIVE-2302
+card_summary: |
+  Pass installer's metadata.json directly to destroyer for cluster deprovision.
+  Previously, any time installer added a field to metadata.json, Hive needed to add bespoke fields
+  and code paths to pass that data to the destroyer. This change stores metadata.json verbatim in a
+  new Secret (referenced by ClusterDeployment.Spec.ClusterMetadata.MetadataJSONSecretRef) and passes
+  it directly to the generic destroyer (hiveutil deprovision), eliminating the need to plumb
+  individual fields through the complex sequence.
+
+root_cause: |
+  Complex field-by-field plumbing required when installer added new metadata.json fields:
+  metadata.json => ClusterProvision => ClusterDeployment => ClusterDeprovision => uninstall pod => uninstall CLI => destroy code
+
+  This created maintenance burden and required code changes every time installer's metadata schema evolved.
+
+  Solution: Store metadata.json as opaque blob in Secret, pass entire blob to generic destroyer.
+
+test_requirements:
+  functional:
+    - Verify modern clusters (created after HIVE-2302) store metadata.json in Secret correctly
+    - Verify modern clusters deprovision successfully using metadata.json Secret
+    - Verify legacy clusters (created before HIVE-2302) are retrofitted with metadata.json Secret
+    - Verify legacy clusters deprovision successfully using retrofitted metadata.json
+    - Verify platform-specific fields (AWS HostedZoneRole, GCP NetworkProjectID, Azure ResourceGroupName) work correctly
+    - Verify vSphere clusters created before and after zonal support both work (metadata.json schema change)
+    - Verify legacy deprovision escape hatch works (annotation: hive.openshift.io/legacy-deprovision: "true")
+    - Verify no resource leaks after deprovision on all platforms
+
+  validation_points:
+    - New Secret created with name: {clustername}-metadata-json
+    - Secret contains key: metadata.json with installer's metadata
+    - ClusterDeployment.Spec.ClusterMetadata.MetadataJSONSecretRef points to Secret
+    - Legacy clusters get Secret retrofitted from ClusterProvision or ClusterDeployment.Spec.ClusterMetadata
+    - Deprovision completes without errors
+    - All cloud resources are deleted (no leaks)
+    - Platform-specific credentials and fields are handled correctly
+
+affected_platforms:
+  primary:
+    - AWS (HostedZoneRole scenario)
+    - Azure (ResourceGroupName scenario)
+    - GCP (NetworkProjectID scenario)
+    - vSphere (pre-zonal and post-zonal metadata formats)
+    - All platforms (generic retrofit and deprovision testing)
+
+  secondary:
+    - IBM Cloud
+    - Nutanix
+    - OpenStack
+
+test_scenarios:
+  scenario_1:
+    name: Modern cluster provision and deprovision
+    flow: Create cluster after HIVE-2302 implementation
+    expected_result: metadata.json Secret created, deprovision succeeds
+    validation: Secret exists, referenced correctly, deprovision clean
+
+  scenario_2:
+    name: Legacy cluster retrofit and deprovision
+    flow: Existing cluster created before HIVE-2302 upgrade
+    expected_result: Secret retrofitted, deprovision succeeds
+    validation: Secret generated from legacy fields, deprovision clean
+
+  scenario_3:
+    name: Platform-specific fields (AWS HostedZoneRole)
+    flow: Create cluster with HostedZoneRole, deprovision
+    expected_result: HostedZoneRole preserved in metadata.json, deprovision succeeds
+    validation: Shared VPC DNS zone cleaned up correctly
+
+  scenario_4:
+    name: Platform-specific fields (GCP NetworkProjectID)
+    flow: Create cluster with NetworkProjectID, deprovision
+    expected_result: NetworkProjectID preserved in metadata.json, deprovision succeeds
+    validation: Shared VPC resources cleaned up correctly
+
+  scenario_5:
+    name: Platform-specific fields (Azure ResourceGroupName)
+    flow: Create cluster with ResourceGroupName, deprovision
+    expected_result: ResourceGroupName preserved in metadata.json, deprovision succeeds
+    validation: Existing resource group resources cleaned up correctly
+
+  scenario_6:
+    name: vSphere pre-zonal and post-zonal clusters
+    flow: Test clusters from before and after vSphere zonal support
+    expected_result: Both metadata.json formats handled correctly
+    validation: Retrofit works for both schemas, deprovision succeeds
+
+  scenario_7:
+    name: Legacy deprovision escape hatch
+    flow: Annotate ClusterDeployment with hive.openshift.io/legacy-deprovision: "true"
+    expected_result: Legacy platform-specific destroyer used instead of generic
+    validation: Legacy code path executes, deprovision succeeds
+
+edge_cases:
+  - Legacy cluster without ClusterProvision (retrofit from ClusterDeployment.Spec.ClusterMetadata only)
+  - Credentials in metadata.json (should be scrubbed - HIVE-2804)
+  - vSphere credential re-injection (username/password removed for security, re-injected at deprovision)
+  - Nutanix credential injection (injected at deprovision time from environment)
+  - Secret already exists (retrofit should not overwrite)
+  - User manually modifies metadata.json Secret (should not be regenerated)
+  - Deprovision before retrofit completes
+
+pr_changes:
+  pr_url: https://github.com/openshift/hive/pull/2729
+  files_modified:
+    - apis/hive/v1/clusterdeployment_types.go (new MetadataJSONSecretRef field)
+    - apis/hive/v1/clusterdeprovision_types.go (new MetadataJSONSecretRef field)
+    - apis/hive/v1/aws/metadata.go (deprecated HostedZoneRole)
+    - apis/hive/v1/azure/metadata.go (deprecated ResourceGroupName)
+    - apis/hive/v1/gcp/metadata.go (deprecated NetworkProjectID)
+    - contrib/pkg/deprovision/deprovision.go (generic destroyer using metadata.json)
+    - pkg/controller/clusterdeployment/clusterdeployment_controller.go (Secret creation and retrofit logic)
+  key_changes:
+    - New API field: ClusterDeployment.Spec.ClusterMetadata.MetadataJSONSecretRef
+    - New API field: ClusterDeprovision.Spec.MetadataJSONSecretRef
+    - Deprecated platform-specific metadata fields (AWS, Azure, GCP)
+    - Generic destroyer: hiveutil deprovision --metadata-json-secret-name
+    - Retrofit logic for legacy clusters
+    - Legacy deprovision escape hatch via annotation
+    - Platform-specific credential handling (vSphere, Nutanix)

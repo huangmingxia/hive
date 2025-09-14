@@ -1,0 +1,12 @@
+component_name: hive
+card_summary: "Fixes a NullPointerException when registering UDFs."
+test_requirements: "Test that registering UDFs does not throw a NullPointerException."
+affected_platforms:
+  - "All platforms where Hive is used."
+test_scenarios:
+  - "Register a UDF and verify it works correctly."
+  - "Register multiple UDFs and verify they work correctly."
+  - "Attempt to register a UDF with invalid parameters and verify it fails gracefully."
+edge_cases:
+  - "Registering a UDF with a name that is already in use."
+  - "Registering a UDF from a different thread."

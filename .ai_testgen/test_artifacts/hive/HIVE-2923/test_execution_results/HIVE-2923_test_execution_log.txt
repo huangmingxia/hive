@@ -1,0 +1,141 @@
+  I1013 05:08:08.443027 47246 test.go:165] Found authentication type used: 
+  I1013 05:08:08.443315 47246 test_context.go:563] The --provider flag is not set. Continuing as if --provider=skeleton had been used.
+  I1013 05:08:09.173745 47246 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get node -l node-role.kubernetes.io/worker -o=jsonpath={.items[*].metadata.name}'
+  I1013 05:08:10.681298 47246 api.go:57] EnvIsKubernetesCluster = no, start monitoring ClusterOperators and ClusterVersions
+started: (0/1/1) "[sig-hive] Cluster_Operator hive should NonHyperShiftHOST-NonPreRelease-ConnectedOnly-Author:mihuang-Medium-HIVE-2923-AWS RequestID scrubbing in DNSZone error messages [Serial]"
+
+  I1013 05:08:14.969825 47253 openshift-tests.go:202] Is kubernetes cluster: no, is external OIDC cluster: no
+  I1013 05:08:14.969990 47253 test_context.go:563] The --provider flag is not set. Continuing as if --provider=skeleton had been used.
+  I1013 05:08:15.114175 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get node -l node-role.kubernetes.io/worker -o=jsonpath={.items[*].metadata.name}'
+  [1760303290] openshift extended e2e - 1/1 specs I1013 05:08:16.525659 47253 clusters.go:324] it is not external oidc cluster
+  I1013 05:08:18.967020 47253 client.go:223] configPath is now "/var/folders/20/qkvr5ldn5y9fp0thm0nsgy240000gn/T/configfile496814093"
+  I1013 05:08:18.967055 47253 client.go:503] The user is now "e2e-test-hive-smvbs-user"
+  I1013 05:08:18.967062 47253 client.go:506] Creating project "e2e-test-hive-smvbs"
+  I1013 05:08:19.266844 47253 client.go:515] Waiting on permissions in project "e2e-test-hive-smvbs" ...
+  I1013 05:08:20.230241 47253 client.go:576] Waiting for ServiceAccount "default" to be provisioned...
+  I1013 05:08:20.573336 47253 client.go:576] Waiting for ServiceAccount "builder" to be provisioned...
+  I1013 05:08:20.915225 47253 client.go:576] Waiting for ServiceAccount "deployer" to be provisioned...
+  I1013 05:08:21.256914 47253 client.go:586] Waiting for RoleBinding "system:image-builders" to be provisioned...
+  I1013 05:08:21.737115 47253 client.go:586] Waiting for RoleBinding "system:deployers" to be provisioned...
+  I1013 05:08:22.216902 47253 client.go:586] Waiting for RoleBinding "system:image-pullers" to be provisioned...
+  I1013 05:08:22.696997 47253 client.go:617] Project "e2e-test-hive-smvbs" has been fully provisioned.
+  I1013 05:08:22.697328 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get nodes -o=jsonpath={.items[*].status.nodeInfo.architecture}'
+  I1013 05:08:24.312037 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get infrastructure cluster -o=jsonpath={.status.platformStatus.type}'
+  I1013 05:08:25.156385 47253 hive_util.go:2558] Checking if MCE is enabled in the cluster
+  I1013 05:08:25.156491 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get MultiClusterEngine multiclusterengine-sample'
+  I1013 05:08:26.263638 47253 client.go:1022] Error running /usr/local/bin/oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get MultiClusterEngine multiclusterengine-sample:
+  error: the server doesn't have a resource type "MultiClusterEngine"
+  I1013 05:08:29.265080 47253 client.go:1013] Running 'oc --namespace=e2e-test-hive-smvbs --kubeconfig=/Users/mihuang/Downloads/kubeconfig process --ignore-unknown-parameters=true -f /var/folders/20/qkvr5ldn5y9fp0thm0nsgy240000gn/T/fixture-testdata-dir3596034050/test/extended/testdata/cluster_operator/hive/namespace.yaml -p NAME=hive'
+  I1013 05:08:30.112750 47253 hive_util.go:597] the file of resource is /tmp/e2e-test-hive-smvbs-mdkk91e9-hive-resource-cfg.json
+  I1013 05:08:30.112887 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig apply -f /tmp/e2e-test-hive-smvbs-mdkk91e9-hive-resource-cfg.json'
+  Warning: resource namespaces/hive is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by oc apply. oc apply should only be used on resources created declaratively by either oc create --save-config or oc apply. The missing annotation will be patched automatically.
+  namespace/hive configured
+  I1013 05:08:34.719331 47253 client.go:1013] Running 'oc --namespace=e2e-test-hive-smvbs --kubeconfig=/Users/mihuang/Downloads/kubeconfig process --ignore-unknown-parameters=true -f /var/folders/20/qkvr5ldn5y9fp0thm0nsgy240000gn/T/fixture-testdata-dir3596034050/test/extended/testdata/cluster_operator/hive/operatorgroup.yaml -p NAME=hive-og NAMESPACE=hive'
+  I1013 05:08:35.549704 47253 hive_util.go:597] the file of resource is /tmp/e2e-test-hive-smvbs-u8nmlyn6-hive-resource-cfg.json
+  I1013 05:08:35.549914 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig apply -f /tmp/e2e-test-hive-smvbs-u8nmlyn6-hive-resource-cfg.json'
+  operatorgroup.operators.coreos.com/hive-og unchanged
+  I1013 05:08:37.550099 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get sub -n hive'
+  I1013 05:08:38.407773 47253 hive_util.go:693] hive subscription already exists.
+  I1013 05:08:38.408126 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get HiveConfig hive'
+  I1013 05:08:39.253852 47253 hive_util.go:734] hivconfig already exists.
+  I1013 05:08:39.254035 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get clusterversion -o=jsonpath={..status.desired.image}'
+  I1013 05:08:40.111496 47253 hive_util.go:1995] Spoke cluster uses OCP image = registry.build09.ci.openshift.org/ci-op-c3htkz1b/release@sha256:3e1c601306b17812cbd7d472965d34530da1663a6eabd90a2fa8fa1fafe3eaf0
+  I1013 05:08:40.351770 47253 hive_util.go:2250] Found region = us-east-1
+  I1013 05:08:40.351899 47253 client.go:1038] showInfo is true
+  I1013 05:08:40.351915 47253 client.go:1040] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get dns/cluster -o=jsonpath={.spec.baseDomain}'
+  I1013 05:08:41.170595 47253 hive_util.go:2220] Found base domain = qe.devcluster.openshift.com
+  STEP: Extracting Hiveutil 10/13/25 05:08:41.17
+  I1013 05:08:41.171166 47253 hive_aws.go:7667] hiveutil extracted to /Users/mihuang/go/src/github.com/openshift/hive/bin/hiveutil
+  STEP: Setting up managed DNS 10/13/25 05:08:41.171
+  I1013 05:08:41.171381 47253 hive_util.go:2603] get AWS Creds from hub cluster
+  I1013 05:08:41.171543 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig extract secret/aws-creds -n kube-system --to=/tmp/e2e-test-hive-smvbs-managed-creds --confirm'
+  /tmp/e2e-test-hive-smvbs-managed-creds/aws_access_key_id
+  /tmp/e2e-test-hive-smvbs-managed-creds/aws_secret_access_key
+  I1013 05:08:54.956393 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get hiveconfig hive -o=jsonpath={.spec.managedDomains}'
+  STEP: Creating secret with invalid AWS credentials to trigger errors 10/13/25 05:08:55.801
+  I1013 05:08:55.802151 47253 client.go:1013] Running 'oc --namespace=e2e-test-hive-smvbs --kubeconfig=/Users/mihuang/Downloads/kubeconfig apply -f /tmp/hive2923-xvgrf85x/invalid-creds.yaml'
+  secret/invalid-aws-creds-hive2923 created
+  STEP: Config Install-Config Secret 10/13/25 05:08:57.138
+  STEP: Config ClusterDeployment with managedDNS and invalid credentials 10/13/25 05:08:57.138
+  STEP: Create AWS ClusterDeployment...e2e-test-hive-smvbs 10/13/25 05:08:57.138
+  STEP: Create ClusterImageSet... 10/13/25 05:08:57.138
+  I1013 05:09:00.139702 47253 client.go:1013] Running 'oc --namespace=e2e-test-hive-smvbs --kubeconfig=/Users/mihuang/Downloads/kubeconfig process --ignore-unknown-parameters=true -f /var/folders/20/qkvr5ldn5y9fp0thm0nsgy240000gn/T/fixture-testdata-dir3596034050/test/extended/testdata/cluster_operator/hive/clusterimageset.yaml -p NAME=cluster-hive2923-udjx-imageset RELEASEIMAGE=registry.build09.ci.openshift.org/ci-op-c3htkz1b/release@sha256:3e1c601306b17812cbd7d472965d34530da1663a6eabd90a2fa8fa1fafe3eaf0'
+  I1013 05:09:00.962324 47253 hive_util.go:597] the file of resource is /tmp/e2e-test-hive-smvbs-flmxduvm-hive-resource-cfg.json
+  I1013 05:09:00.962450 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig apply -f /tmp/e2e-test-hive-smvbs-flmxduvm-hive-resource-cfg.json'
+  clusterimageset.hive.openshift.io/cluster-hive2923-udjx-imageset created
+  STEP: Copy AWS platform credentials... 10/13/25 05:09:02.046
+  I1013 05:09:02.046910 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig extract secret/aws-creds -n kube-system --to=/tmp/e2e-test-hive-smvbs-creds --confirm'
+  /tmp/e2e-test-hive-smvbs-creds/aws_access_key_id
+  /tmp/e2e-test-hive-smvbs-creds/aws_secret_access_key
+  I1013 05:09:02.924401 47253 client.go:1013] Running 'oc --namespace=e2e-test-hive-smvbs --kubeconfig=/var/folders/20/qkvr5ldn5y9fp0thm0nsgy240000gn/T/configfile496814093 create secret generic aws-creds --from-file=/tmp/e2e-test-hive-smvbs-creds/aws_access_key_id --from-file=/tmp/e2e-test-hive-smvbs-creds/aws_secret_access_key -n e2e-test-hive-smvbs'
+  secret/aws-creds created
+  STEP: Copy pull-secret... 10/13/25 05:09:03.75
+  I1013 05:09:03.751289 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig extract secret/pull-secret -n openshift-config --to=/tmp/e2e-test-hive-smvbs-pull --confirm'
+  /tmp/e2e-test-hive-smvbs-pull/.dockerconfigjson
+  I1013 05:09:04.857020 47253 client.go:1013] Running 'oc --namespace=e2e-test-hive-smvbs --kubeconfig=/var/folders/20/qkvr5ldn5y9fp0thm0nsgy240000gn/T/configfile496814093 create secret generic pull-secret --from-file=/tmp/e2e-test-hive-smvbs-pull/.dockerconfigjson -n e2e-test-hive-smvbs'
+  secret/pull-secret created
+  STEP: Create AWS Install-Config Secret... 10/13/25 05:09:05.951
+  I1013 05:09:08.953267 47253 client.go:1013] Running 'oc --namespace=e2e-test-hive-smvbs --kubeconfig=/Users/mihuang/Downloads/kubeconfig process --ignore-unknown-parameters=true -f /var/folders/20/qkvr5ldn5y9fp0thm0nsgy240000gn/T/fixture-testdata-dir3596034050/test/extended/testdata/cluster_operator/hive/aws-install-config.yaml -p NAME1=cluster-hive2923-udjx-install-config NAMESPACE=e2e-test-hive-smvbs BASEDOMAIN=cluster-hive2923-udjx.qe.devcluster.openshift.com NAME2=cluster-hive2923-udjx REGION=us-east-1 PUBLISH=External VMTYPE=m6i.xlarge ARCH=amd64 INTERNALJOINSUBNET=100.64.0.0/16 CLUSTERNETWORKMTU=8901'
+  I1013 05:09:09.807402 47253 hive_util.go:597] the file of resource is /tmp/e2e-test-hive-smvbs-mva89wx2-hive-resource-cfg.json
+  I1013 05:09:09.807565 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig apply -f /tmp/e2e-test-hive-smvbs-mva89wx2-hive-resource-cfg.json'
+  secret/cluster-hive2923-udjx-install-config created
+  I1013 05:09:14.161852 47253 client.go:1013] Running 'oc --namespace=e2e-test-hive-smvbs --kubeconfig=/Users/mihuang/Downloads/kubeconfig process --ignore-unknown-parameters=true -f /var/folders/20/qkvr5ldn5y9fp0thm0nsgy240000gn/T/fixture-testdata-dir3596034050/test/extended/testdata/cluster_operator/hive/clusterdeployment.yaml -p FAKE=true NAME=cluster-hive2923-udjx NAMESPACE=e2e-test-hive-smvbs BASEDOMAIN=cluster-hive2923-udjx.qe.devcluster.openshift.com CLUSTERNAME=cluster-hive2923-udjx MANAGEDNS=true PLATFORMTYPE=aws CREDREF=invalid-aws-creds-hive2923 REGION=us-east-1 IMAGESETREF=cluster-hive2923-udjx-imageset INSTALLCONFIGSECRET=cluster-hive2923-udjx-install-config PULLSECRETREF=pull-secret INSTALLATTEMPTSLIMIT=1 INSTALLERTYPE=installer CUSTOMIZEDTAG=hive-qe-cd-tag'
+  I1013 05:09:14.997343 47253 hive_util.go:597] the file of resource is /tmp/e2e-test-hive-smvbs-owaqrost-hive-resource-cfg.json
+  I1013 05:09:14.997484 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig apply -f /tmp/e2e-test-hive-smvbs-owaqrost-hive-resource-cfg.json'
+  clusterdeployment.hive.openshift.io/cluster-hive2923-udjx created
+  STEP: Wait for DNSZone to be created and get DNSZone name dynamically 10/13/25 05:09:16.305
+  I1013 05:09:26.307305 47253 client.go:1038] showInfo is true
+  I1013 05:09:26.307348 47253 client.go:1040] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get dnszone -n e2e-test-hive-smvbs -o=jsonpath={.items[*].metadata.name}'
+  I1013 05:09:27.154406 47253 hive_aws.go:7745] DNSZone created: cluster-hive2923-udjx-zone
+  STEP: Wait for DNSZone to have DNSError condition due to invalid credentials 10/13/25 05:09:27.154
+  I1013 05:09:37.155763 47253 client.go:1038] showInfo is true
+  I1013 05:09:37.155840 47253 client.go:1040] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get dnszone cluster-hive2923-udjx-zone -n e2e-test-hive-smvbs -o=jsonpath={.status.conditions[?(@.type=='DNSError')].status}'
+  I1013 05:09:38.009990 47253 hive_aws.go:7756] DNSZone has DNSError condition
+  STEP: Capture initial DNSError message (T1) 10/13/25 05:09:38.01
+  I1013 05:09:38.010315 47253 client.go:1038] showInfo is true
+  I1013 05:09:38.010329 47253 client.go:1040] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get dnszone cluster-hive2923-udjx-zone -n e2e-test-hive-smvbs -o=jsonpath={.status.conditions[?(@.type=='DNSError')].message}'
+  I1013 05:09:38.842123 47253 hive_aws.go:7761] T1 Error Message: operation error Resource Groups Tagging API: GetResources, https response error StatusCode: 400, api error UnrecognizedClientException: The security token included in the request is invalid.
+  I1013 05:09:38.842297 47253 client.go:1038] showInfo is true
+  I1013 05:09:38.842310 47253 client.go:1040] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get dnszone cluster-hive2923-udjx-zone -n e2e-test-hive-smvbs -o=jsonpath={.metadata.resourceVersion}'
+  I1013 05:09:39.672745 47253 hive_aws.go:7765] T1 ResourceVersion: 363842
+  STEP: Wait 60 seconds for multiple reconcile cycles 10/13/25 05:09:39.672
+  STEP: Capture subsequent DNSError message (T2) 10/13/25 05:10:39.674
+  I1013 05:10:39.674728 47253 client.go:1038] showInfo is true
+  I1013 05:10:39.674802 47253 client.go:1040] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get dnszone cluster-hive2923-udjx-zone -n e2e-test-hive-smvbs -o=jsonpath={.status.conditions[?(@.type=='DNSError')].message}'
+  I1013 05:10:40.635958 47253 hive_aws.go:7773] T2 Error Message: operation error Resource Groups Tagging API: GetResources, https response error StatusCode: 400, api error UnrecognizedClientException: The security token included in the request is invalid.
+  I1013 05:10:40.636251 47253 client.go:1038] showInfo is true
+  I1013 05:10:40.636282 47253 client.go:1040] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get dnszone cluster-hive2923-udjx-zone -n e2e-test-hive-smvbs -o=jsonpath={.metadata.resourceVersion}'
+  I1013 05:10:41.492508 47253 hive_aws.go:7777] T2 ResourceVersion: 363842
+  STEP: Verify message stability - T1 and T2 messages must be identical 10/13/25 05:10:41.492
+  I1013 05:10:41.492807 47253 hive_aws.go:7781] ✅ PASS: Error messages are identical (stable across reconciles)
+  STEP: Verify RequestID absence - no UUID patterns should be present 10/13/25 05:10:41.492
+  I1013 05:10:41.492929 47253 hive_aws.go:7787] ✅ PASS: No UUID patterns found (RequestID properly scrubbed)
+  STEP: Verify reconcile frequency is stable (not thrashing) 10/13/25 05:10:41.492
+  I1013 05:10:41.492992 47253 hive_aws.go:7794] ResourceVersion changes: 0 over 60 seconds (0.00 changes/min)
+  I1013 05:10:41.493003 47253 hive_aws.go:7796] ✅ PASS: Reconcile frequency is stable (< 5 changes/min, proper backoff)
+  I1013 05:10:41.493118 47253 hive_util.go:1154] Start to remove: {ClusterDeployment e2e-test-hive-smvbs cluster-hive2923-udjx}
+  I1013 05:10:41.493317 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get ClusterDeployment -n e2e-test-hive-smvbs cluster-hive2923-udjx -o=jsonpath={.spec.installed}'
+  I1013 05:10:42.577884 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get ClusterDeployment -n e2e-test-hive-smvbs cluster-hive2923-udjx -o=jsonpath={.status.conditions}'
+  I1013 05:10:43.660654 47253 hive_util.go:1199] statusConditions is [{"lastProbeTime":"2025-10-12T21:09:16Z","lastTransitionTime":"2025-10-12T21:09:16Z","message":"The security token included in the request is invalid.","reason":"AuthenticationFailure","status":"True","type":"DNSNotReady"},{"lastProbeTime":"2025-10-12T21:09:16Z","lastTransitionTime":"2025-10-12T21:09:16Z","message":"DNSZone failed to reconcile (see the DNSNotReadyCondition condition for details)","reason":"DNSZoneFailedToReconcile","status":"True","type":"ProvisionStopped"},{"lastProbeTime":"2025-10-12T21:09:16Z","lastTransitionTime":"2025-10-12T21:09:16Z","message":"Provisioning failed terminally (see the ProvisionStopped condition for details)","reason":"ProvisionStopped","status":"False","type":"Provisioned"},{"lastProbeTime":"2025-10-12T21:09:16Z","lastTransitionTime":"2025-10-12T21:09:16Z","message":"Platform credentials passed authentication check","reason":"PlatformAuthSuccess","status":"False","type":"AuthenticationFailure"},{"lastProbeTime":"2025-10-12T21:09:22Z","lastTransitionTime":"2025-10-12T21:0
+  I1013 05:10:43.661014 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get pod -l hive.openshift.io/job-type=provision -n e2e-test-hive-smvbs -o=jsonpath={.items[*].metadata.name}'
+  I1013 05:10:44.573457 47253 hive_util.go:1206] provisionPodOutput is 
+  I1013 05:10:44.573798 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig delete ClusterDeployment -n e2e-test-hive-smvbs cluster-hive2923-udjx --ignore-not-found'
+  I1013 05:10:45.886779 47253 hive_util.go:1187] Wait ClusterDeployment delete done for cluster-hive2923-udjx
+  I1013 05:11:15.888115 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig get ClusterDeployment -A'
+  I1013 05:11:16.727492 47253 hive_util.go:1130] the queried resource:No resources found
+  I1013 05:11:16.727547 47253 hive_util.go:1144] the output No resources found does not contain the content cluster-hive2923-udjx, expected
+  I1013 05:11:16.727645 47253 hive_util.go:1154] Start to remove: {Secret e2e-test-hive-smvbs cluster-hive2923-udjx-install-config}
+  I1013 05:11:16.727791 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig delete Secret -n e2e-test-hive-smvbs cluster-hive2923-udjx-install-config --ignore-not-found'
+  I1013 05:11:17.824146 47253 hive_util.go:1154] Start to remove: {ClusterImageSet  cluster-hive2923-udjx-imageset}
+  I1013 05:11:17.824508 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig delete ClusterImageSet cluster-hive2923-udjx-imageset --ignore-not-found'
+  I1013 05:11:18.943396 47253 hive_util.go:1154] Start to remove: {secret e2e-test-hive-smvbs invalid-aws-creds-hive2923}
+  I1013 05:11:18.943573 47253 client.go:1013] Running 'oc --kubeconfig=/Users/mihuang/Downloads/kubeconfig delete secret -n e2e-test-hive-smvbs invalid-aws-creds-hive2923 --ignore-not-found'
+  I1013 05:11:20.057300 47253 hive_aws.go:7671] Restoring managedDomains in HiveConfig
+  I1013 05:11:20.057461 47253 client.go:1013] Running 'oc --namespace=e2e-test-hive-smvbs --kubeconfig=/Users/mihuang/Downloads/kubeconfig patch hiveconfig hive --type json -p [{"op": "remove", "path": "/spec/managedDomains"}]'
+  I1013 05:11:21.935186 47253 client.go:703] Deleted {user.openshift.io/v1, Resource=users  e2e-test-hive-smvbs-user}, err: <nil>
+  I1013 05:11:22.243739 47253 client.go:703] Deleted {oauth.openshift.io/v1, Resource=oauthclients  e2e-client-e2e-test-hive-smvbs}, err: <nil>
+  I1013 05:11:22.499632 47253 client.go:703] Deleted {oauth.openshift.io/v1, Resource=oauthaccesstokens  sha256~Z0raStx9tFvdkwjodze1jddk-VCRSg0c0zkHm_VzX4A}, err: <nil>
+  • SUCCESS! 3m6.243395375s 
+passed: (3m12s) 2025-10-12T21:11:22 "[sig-hive] Cluster_Operator hive should NonHyperShiftHOST-NonPreRelease-ConnectedOnly-Author:mihuang-Medium-HIVE-2923-AWS RequestID scrubbing in DNSZone error messages [Serial]"
+
+1 pass, 0 skip (3m12s)

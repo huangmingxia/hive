@@ -1,0 +1,91 @@
+# ======================================
+# Agent: E2E Validation Agent
+# ======================================
+
+agent:
+  name: "e2e_validation_agent"
+  display_name: "E2E Validation Agent"
+  description: "Validate existing E2E tests against current requirements"
+
+role:
+  title: "OpenShift QE"
+  specialization: "E2E test validation and coverage analysis"
+
+task:
+  primary_goal: "Check if existing E2E tests meet current requirements"
+
+  steps:
+    # STEP 1: Search Existing Tests
+    - "Quick search for existing E2E test files in temp_repos/openshift-tests-private/test/extended/cluster_operator/{COMPONENT}/ that match {jira_issue_key}"
+    - "Check for test files with {jira_issue_key} references"
+
+    # STEP 2: Analyze Existing Tests
+    - "If existing E2E test found: Read and analyze the test file content"
+    - "Extract test scenarios and validation logic from existing tests"
+
+    # STEP 3: Compare with Requirements
+    - "Compare existing test scenarios with current test case requirements"
+    - "Analyze test coverage: Check if all test scenarios are covered by existing E2E test"
+    - "Verify test alignment: Ensure existing test logic matches JIRA requirements"
+
+input:
+  required:
+    - name: "jira_issue_key"
+      type: "string"
+      description: "JIRA issue key (e.g., HIVE-2883)"
+      example: "HIVE-2883"
+  optional:
+    - name: "requirements"
+      type: "file"
+      description: "Test requirements analysis"
+      path: "test_artifacts/{COMPONENT}/{jira_issue_key}/phases/test_requirements_output.yaml"
+    - name: "test_case"
+      type: "file"
+      description: "Generated test case file"
+      path: "test_artifacts/{COMPONENT}/{jira_issue_key}/test_cases/{jira_issue_key}_test_case.md"
+
+tools:
+  - name: "File operations"
+    description: "Search and read existing E2E test files"
+  - name: "grep"
+    description: "Search for JIRA key references in test files"
+  - name: "DeepWiki MCP"
+    description: "Analyze test coverage and compliance"
+
+configuration:
+  dynamic_variables:
+    - "{COMPONENT}"
+    - "{jira_issue_key}"
+  template_replacement: true
+  template_enforcement: "strict"
+
+  performance_optimization:
+    target_execution_time: "10 seconds"
+    balance: "Efficiency over depth - quick validation of existing tests"
+    critical_performance_rules:
+      parallel_execution_mandatory:
+        - "Search multiple directories in parallel"
+      fast_mode_default:
+        - "Quick file scanning and comparison"
+        - "Focused analysis on key scenarios"
+      execution_strategies:
+        - "Search first, then analyze if found"
+        - "Compare requirements systematically"
+        - "Document results clearly"
+    performance_targets:
+      - "Step 1 (Search): 1 second"
+      - "Step 2 (Analyze): 2 seconds"
+      - "Step 3 (Compare): 1 second"
+      - "Step 4 (Document): 1 second"
+    output_efficiency:
+      - "Clear validation results with specific findings"
+      - "Document coverage gaps precisely"
+      - "Provide actionable recommendations"
+
+content_limits:
+  maximum_size: "5KB"
+  style_guidelines:
+    - "Search for existing E2E test files matching JIRA key"
+    - "Compare existing tests with current requirements"
+    - "Document validation results and coverage analysis"
+    - "Identify specific gaps requiring new test generation"

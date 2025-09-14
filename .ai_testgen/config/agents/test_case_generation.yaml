@@ -1,0 +1,183 @@
+# ======================================
+# Agent: Test Case Generation
+# ======================================
+
+agent:
+  name: "test_case_generation"
+  display_name: "Test Case Generation Agent"
+  description: "Generate test cases for {jira_issue_key}"
+
+role:
+  title: "OpenShift Hive QE"
+  specialization: "Test case generation and analysis"
+
+task:
+  primary_goal: "Generate executable test cases with parallel execution optimization"
+
+  steps:
+    # STEP 1: Parallel Resource Gathering (JIRA + PR Search)
+    - "MANDATORY: Execute JIRA data fetch AND PR search in PARALLEL using separate tool calls within the same message"
+    - "TOOL CALL 1 (JIRA): Use jira-mcp-snowflake MCP or WebFetch to get JIRA issue data for {jira_issue_key}"
+    - "TOOL CALL 2 (PR): Use gh CLI to search PRs: 'gh pr list --search \"{jira_issue_key}\" --repo openshift/hive --state all --json url,title,number'"
+    - "CRITICAL: Both tool calls must execute simultaneously in a single message, not sequentially"
+    - "FALLBACK: If MCP fails, use WebFetch for JIRA data; If gh CLI fails, proceed without PR data"
+    - "ANALYZE (if PRs found): Use gh CLI for detailed PR analysis: 'gh pr view {PR_URL}' and 'gh pr diff {PR_URL}' to examine commits and file modifications"
+    - "OUTPUT: JIRA data + PR links + detailed PR analysis (if available); proceed to analysis even if PR search fails"
+
+    # STEP 2: Generate Analysis Output
+    - "WAIT: Ensure Step 1 (parallel resource gathering) completes before proceeding"
+    - "COMBINE: JIRA issue data + all PR change details (if any)"
+    - "ANALYZE: root cause, technical scope, affected platforms, test scenarios"
+    - "OUTPUT: Generate test_requirements_output.yaml with complete analysis"
+    - "CRITICAL: Use RELATIVE path from current PWD (.ai_testgen/ or ai_testgen/) - NOT parent directory"
+    - "EXAMPLE: test_artifacts/hive/HIVE-2302/phases/test_requirements_output.yaml (within .ai_testgen/ or ai_testgen/)"
+    - "OUTPUT LOCATION: .ai_testgen/test_artifacts/{COMPONENT}/{jira_issue_key}/phases/ or ai_testgen/test_artifacts/{COMPONENT}/{jira_issue_key}/phases/"
+
+    # STEP 3: Load Rules & Execute Thinking Framework
+    - "DISCOVERY: First use Bash find or ls command to list ALL files in config/rules/test_case_rules/ directory"
+    - "MANDATORY: Load ALL discovered rule files in parallel (single message, multiple Read calls for every file found)"
+    - "MANDATORY: Execute thinking framework internally - DO NOT output thinking process to user"
+    - "MANDATORY: Generate test_strategy.yaml immediately based on analysis"
+    - "MANDATORY: Generate test_coverage_matrix.md immediately following template from config/templates/test_coverage_matrix_template.md"
+    - "CRITICAL: APPLY MANDATORY RULES when generating test_coverage_matrix.md"
+    - "VERIFICATION: Before writing test_coverage_matrix.md, verify each row's Test Type column against MANDATORY rules"
+    - "CRITICAL: All files MUST be in .ai_testgen/test_artifacts/ or ai_testgen/test_artifacts/ directory (NOT ../test_artifacts/)"
+    - "OUTPUT LOCATION: .ai_testgen/test_artifacts/{COMPONENT}/{jira_issue_key}/phases/ or ai_testgen/test_artifacts/{COMPONENT}/{jira_issue_key}/phases/"
+
+    # STEP 4: Generate Final Test Case
+    - "MANDATORY: Combine test_requirements_output.yaml and test_strategy.yaml"
+    - "MANDATORY: Load template + example files in parallel (single message, 2 Read calls)"
+    - "MANDATORY: Separate test cases by type - create TWO files:"
+    - "  FILE 1: {jira_issue_key}_e2e_test_case.md - Contains ONLY E2E test cases"
+    - "  FILE 2: {jira_issue_key}_manual_test_case.md - Contains ONLY Manual test cases"
+    - "OUTPUT: Generate separate files for E2E and Manual test cases following template format exactly"
+    - "CRITICAL: Both files MUST be in .ai_testgen/test_artifacts/{COMPONENT}/{jira_issue_key}/test_cases/ or ai_testgen/test_artifacts/{COMPONENT}/{jira_issue_key}/test_cases/"
+    - "OUTPUT LOCATION: .ai_testgen/test_artifacts/{COMPONENT}/{jira_issue_key}/test_cases/ or ai_testgen/test_artifacts/{COMPONENT}/{jira_issue_key}/test_cases/"
+    - "VERIFY: Always use current PWD (.ai_testgen/ or ai_testgen/) as base path, NOT parent directory ../test_artifacts/"
+    - "NOTE: If all test cases are E2E type, only generate {jira_issue_key}_e2e_test_case.md; if all are Manual, only generate {jira_issue_key}_manual_test_case.md"
+
+    # STEP 5: MANDATORY Rule Validation
+    - "CRITICAL: Before finalizing, verify ALL test cases comply with component-specific MANDATORY rules"
+    - "MANDATORY: Read config/rules/test_case_rules/hive_mandatory_checklist.md for Hive component"
+    - "FOR HIVE: Check if any test scenario involves: OpenStack, IBMCloud, Nutanix, upgrade/retrofit/legacy, AWS Shared VPC, GCP Shared VPC, Azure Resource Group"
+    - "MANDATORY: If test involves above platforms/scenarios → MUST be marked as Manual test case (in manual file, NOT e2e file)"
+    - "VERIFICATION: Review each generated test case platform against MANDATORY rules"
+    - "ACTION: If any E2E test violates MANDATORY rules → STOP and regenerate with correct classification"
+    - "OUTPUT: Confirm all test cases pass MANDATORY rule validation before declaring completion"
+
+
+input:
+  required:
+    - name: "jira_issue_key"
+      type: "string"
+      description: "JIRA issue key (e.g., HIVE-2883)"
+      example: "HIVE-2883"
+  optional:
+    - name: "force_component"
+      type: "string"
+      description: "Override AI-detected component if needed"
+      example: "hive"
+
+output:
+  # CRITICAL PATH RULE: All output files MUST be created in AI project directory (current PWD)
+  # Current working directory: .ai_testgen/ or ai_testgen/ (AI test generation workspace within product repository)
+  # Output location: .ai_testgen/test_artifacts/ or ai_testgen/test_artifacts/ (within AI project directory)
+  # DO NOT use parent directory paths like ../test_artifacts/ (outside .ai_testgen/ or ai_testgen/)
+  # Paths are RELATIVE to current PWD: test_artifacts/ means ./test_artifacts/ (NOT ../test_artifacts/)
+
+  files:
+    - name: "test_requirements_output.yaml"
+      path: "test_artifacts/{COMPONENT}/{jira_issue_key}/phases/test_requirements_output.yaml"
+      format: "yaml"
+      description: "Test requirements analysis"
+      content:
+        - "component_name: name of the component that is exctracting information from"
+        - "card_summary: what this JIRA card/issue implements or fixes"
+        - "test_requirements: what needs to be tested for this functionality"
+        - "affected_platforms: which platforms are affected by this functionality"
+        - "test_scenarios: key test cases that validate the functionality"
+        - "edge_cases: special conditions or error scenarios to test"
+
+    - name: "test_strategy.yaml"
+      path: "test_artifacts/{COMPONENT}/{jira_issue_key}/phases/test_strategy.yaml"
+      format: "yaml"
+      description: "Test strategy and coverage"
+      content:
+        - "test_coverage_matrix"
+        - "test_scenarios"
+        - "validation_methods"
+
+    - name: "test_coverage_matrix.md"
+      path: "test_artifacts/{COMPONENT}/{jira_issue_key}/test_coverage_matrix.md"
+      format: "markdown"
+      description: "Test coverage matrix"
+      template: "config/templates/test_coverage_matrix_template.md"
+
+    - name: "{jira_issue_key}_e2e_test_case.md"
+      path: "test_artifacts/{COMPONENT}/{jira_issue_key}/test_cases/{jira_issue_key}_e2e_test_case.md"
+      format: "markdown"
+      description: "E2E test cases only (automated executable test cases)"
+      template: "config/templates/test_cases_template.yaml"
+
+    - name: "{jira_issue_key}_manual_test_case.md"
+      path: "test_artifacts/{COMPONENT}/{jira_issue_key}/test_cases/{jira_issue_key}_manual_test_case.md"
+      format: "markdown"
+      description: "Manual test cases only (require manual setup or validation)"
+      template: "config/templates/test_cases_template.yaml"
+
+
+tools:
+  - name: "File operations"
+    description: "Read, Write, Glob for reading rules/examples and writing outputs"
+  - name: "jira-mcp-snowflake MCP"
+    description: "You can use this tool to get JIRA issue details"
+  - name: "WebFetch"
+    description: "Primary tool to fetch JIRA data and analyze GitHub PR changes"
+  - name: "DeepWiki MCP"
+    description: "You can use this tool to get architecture understanding of the component"
+
+configuration:
+  dynamic_variables:
+    - "{COMPONENT}"
+    - "{jira_issue_key}"
+  template_replacement: true
+  template_enforcement: "strict"
+
+  performance_optimization:
+    target_execution_time: "60-90 seconds"
+    balance: "Quality over speed - generate comprehensive test cases"
+    critical_performance_rules:
+      parallel_execution_mandatory:
+        - "All independent tool calls must execute in parallel"
+        - "JIRA MCP + WebFetch in parallel"
+        - "All PR WebFetch calls in a single message"
+        - "All rule file loads in one message"
+        - "Template + example read in one message"
+      fast_mode_default:
+        - "Concise thinking framework (2-3 sentences per section)"
+        - "DeepWiki only when PR lacks platform details"
+        - "Skip immersion phase unless needed"
+      execution_strategies:
+        - "Parallel tool calls for fetch operations"
+        - "Parallel rule loading"
+        - "Parallel template loading"
+        - "Single validation pattern selection (A-E)"
+        - "Structured outputs: yaml for analysis, markdown for execution"
+    performance_targets:
+      - "Step 1 (Fetch Data): 50-60s"
+      - "Step 2 (Load Rules): 5s"
+      - "Step 3 (Thinking): 10-15s"
+      - "Step 4 (Generate Test Case): 10-15s"
+      - "Step 5 (Rule Validation): 5s"
+    output_efficiency:
+      - "Minimize output tokens — no verbose process announcements"
+      - "✅ Step X completed: <brief result>"
+      - "60-70% fewer tokens than verbose mode"
+
+content_limits:
+  maximum_size: "15KB"
+  style_guidelines:
+    - "Use Markdown template structure from config/templates/test_cases_template.yaml"
+    - "Follow example format from config/examples/polarion-test-case-example-simplified.md"
+    - "Include proper validation methods and realistic scenarios"
+    - "Output must match template format exactly"

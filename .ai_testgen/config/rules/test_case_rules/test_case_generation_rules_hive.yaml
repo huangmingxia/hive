@@ -1,0 +1,30 @@
+# Test Case Generation Rules - Hive Specific Configuration
+
+"Hive Repository Context (MANDATORY)":
+  "CRITICAL: Hive Repository Context Understanding":
+    "Current Working Directory": ".ai_testgen/ or ai_testgen/ (AI test generation workspace WITHIN Hive repository)"
+    "Analysis Target": "Hive product source code at ../ (parent directory - the Hive repository root)"
+    "Test Generation Target": "temp_repos/openshift-tests-private/ (private E2E test repository)"
+  "Key Distinction":
+    "Product Code": "What we ANALYZE - Hive source code at ../ (we are INSIDE the Hive repository)"
+    "DeepWiki": "Alternative source for Hive architecture analysis (but local code is preferred)"
+
+"MANDATORY: Hive-Specific Test Case Rules":
+  - >
+    MANDATORY: If contains keywords "retrofit", "legacy", "upgrade" - this is an upgrade test scenario, mark the test case as manual test case. Test with legacy resources (simulated without feature) -> upgrade to NEW Hive (has feature).
+  - >
+    MANDATORY: DNSZone Related tests MUST create a managed DNS cluster for testing. Using hiveutil to configure managedDomains in HiveConfig, then create ClusterDeployment to trigger DNSZone creation automatically (do NOT create DNSZone directly). Reference e2e case 24088 for proper setup pattern.
+  - >
+    MANDATORY: AWS HostedZoneRole is used in AWS shared VPC scenarios where DNS hosted zone is in a different AWS account, if required AWS shared VPC, mark the test case as manual test case, need manually setup AWS shared VPC.
+  - >
+    MANDATORY: GCP NetworkProjectID is used in GCP shared VPC scenarios where network is in a a different GCP project, if required GCP shared VPC, mark the test case as manual test case, need manually setup GCP shared VPC.
+  - >
+    MANDATORY: Azure ResourceGroupName is used to specify existing resource group for Azure cluster, if required Azure existing resource group, mark the test case as manual test case, need manually prepare the specific resource group.
+
+"MANDATORY: If test scenario is related to upgrade, AWS Shared VPC, GCP Shared VPC, Azure Resource Group, Nutanix, OpenStack or IBM Cloud, mark the test scenario as manual test case.":
+  - >
+    MANDATORY: If test scenario is related to upgrade, AWS Shared VPC, GCP Shared VPC, Azure Resource Group, Nutanix, OpenStack or IBM Cloud, mark the test scenario as manual test case.
+
+"Hive-Specific Implementation Details":
+  "Hive Module Information":
+    "Module Name": "github.com/openshift/hive"

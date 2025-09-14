@@ -1,0 +1,64 @@
+component_name: hive
+jira_issue_key: HIVE-2923
+card_summary: |
+  Fix AWS RequestID scrubbing in error messages to prevent DNSZone controller thrashing.
+  AWS changed the spelling of embedded request IDs in error messages from "Request ID" (with space) 
+  to "RequestID" (no space), causing the error scrubber regex to fail. This resulted in status 
+  condition messages being updated every reconcile, triggering immediate requeues and controller thrashing.
+  
+  The fix updates the regex pattern to make the space optional and consolidates duplicate scrubbing 
+  logic across multiple controllers (DNSZone, AWSPrivateLink, PrivateLink).
+
+root_cause: |
+  AWS SDK v2 transition or AWS API change modified the format of request IDs in error messages.
+  The error scrubber regex pattern assumed a space between "Request" and "ID" but AWS started 
+  using "RequestID" (no space), causing the regex to fail and request IDs to persist in status 
+  condition messages, triggering continuous CR updates and controller thrashing.
+
+technical_scope:
+  affected_files:
+    - pkg/controller/utils/errorscrub.go (updated regex pattern)
+    - pkg/controller/awsprivatelink/awsprivatelink_controller.go (removed duplicate scrubber)
+    - pkg/controller/privatelink/conditions/conditions.go (removed duplicate scrubber)
+    - pkg/controller/utils/errorscrub_test.go (added test cases)
+    - pkg/controller/awsprivatelink/awsprivatelink_controller_test.go (removed duplicate tests)
+  
+  changes_made:
+    - Updated awsRequestIDRE regex from `(request id: )` to `(request ?id: )` (optional space)
+    - Removed filterErrorMessage() from awsprivatelink_controller.go
+    - Removed filterErrorMessage() from privatelink/conditions/conditions.go
+    - Consolidated error scrubbing to use centralized controllerutils.ErrorScrub()
+    - Added comprehensive test cases for various RequestID formats
+
+test_requirements:
+  validation_objectives:
+    - Verify AWS error messages with "RequestID" (no space) are properly scrubbed
+    - Verify AWS error messages with "Request ID" (with space) are still properly scrubbed
+    - Confirm DNSZone status condition messages do not contain request IDs
+    - Verify DNSZone controller does not thrash when AWS returns errors
+    - Validate AWSPrivateLink controller uses centralized error scrubbing
+    - Validate PrivateLink controller uses centralized error scrubbing
+  
+  test_scenarios:
+    - Trigger AWS error with "RequestID" format and verify scrubbing
+    - Trigger AWS error with "Request ID" format and verify scrubbing
+    - Verify DNSZone CR status condition message is stable across reconciles
+    - Validate no immediate requeues due to status condition changes
+    - Test error scrubbing across multiple AWS error types (EC2, Route53, ResourceGroupsTagging)
+
+affected_platforms:
+  - AWS (all AWS-based ClusterDeployments using DNSZone, AWSPrivateLink, or PrivateLink)
+
+edge_cases:
+  - Error messages containing multiple request IDs with different formats
+  - Error messages with embedded newlines and request IDs
+  - Error messages with request ID at the end of the message
+  - Concurrent AWS API errors triggering rapid reconciles
+  - AWS SDK v2 vs v1 error message format differences
+
+dependencies:
+  - AWS SDK v2 (HIVE-2849)
+  - DNSZone controller reconcile logic
+  - AWSPrivateLink controller error handling
+  - PrivateLink controller error handling
+

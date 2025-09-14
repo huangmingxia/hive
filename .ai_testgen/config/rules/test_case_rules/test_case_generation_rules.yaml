@@ -1,0 +1,136 @@
+# Test Case Generation Rules - Universal Template
+
+"CORE PROBLEM IDENTIFICATION (MANDATORY - EXECUTE FIRST)":
+  "PRIMARY RULE": "Identify the single technical root cause and design minimal validation"
+  "MANDATORY": "If a test scenario is required validation for multiple platforms, only generate 1 test case and give a clear note that required for multiple platforms"
+
+"Architecture Understanding (MANDATORY)":
+  "MANDATORY: Data Source Selection":
+    "DeepWiki Limitation": "DeepWiki MCP has approximately 1 week data lag - may not contain latest code changes"
+    "Two Options Available":
+      - "DeepWiki MCP (RECOMMENDED for general architecture)":
+          description: "Use DeepWiki MCP for overall system architecture understanding. Good for established patterns, general workflows, documentation."
+          Pros: "Structured knowledge, comprehensive analysis"
+          Cons: "~1 week data lag, may miss recent changes"
+  "MANDATORY Strategy (MUST FOLLOW)":
+    - "Use PR analysis (WebFetch GitHub PR) for code changes and new implementations"
+    - "Use DeepWiki for stable knowledge: platform requirements, general architecture, testing prerequisites"
+    - "DeepWiki has ~1 week data lag - only use for knowledge that stays stable (not affected by recent PRs)"
+  "Core Architecture Analysis":
+    - "Understand component's role in the overall system"
+    - "Identify the complete end-to-end flow that would expose the reported issue"
+    - "Determine if testing should focus on user workflows vs. direct resource manipulation"
+    - "Understand component dependencies and integration points"
+
+"Detailed Architecture Analysis Framework":
+  "Implementation Analysis Methods":
+    "Repository Context Understanding":
+      "Analysis Target": "Project source code (configure based on project structure)"
+      "Test Generation Target": "Configure based on project test repository structure"
+    "Key Distinction":
+      "Product Code": "What we ANALYZE - project source code"
+      "Test Code": "Where we WRITE E2E tests - project test repository"
+      "DeepWiki": "Alternative source for architecture analysis (but local code is preferred)"
+    "Repository Context Check": |
+      # Verify project repository structure
+      pwd # Check current working directory
+      ls -la | grep -E "(go.mod|Makefile|pkg|cmd|src)" | head -5
+    "Analysis Strategy":
+      "Primary Strategy - Local Repository Analysis":
+        "Technical Implementation Analysis":
+          - "Navigate to project root directory"
+          - "Search project code: `grep -r \"ComponentName\" ./pkg/ ./cmd/`"
+          - "Find controllers: `find . -name \"*controller*\" -type f`"
+          - "Read relevant source files directly for latest implementation details"
+        "Architecture Understanding Tasks":
+          - "Use local codebase to understand component architecture and its role in the overall system"
+          - "Identify how the JIRA component fits into user workflows and system interactions"
+          - "Determine what user actions or system operations would naturally trigger the reported issue"
+          - "Question: How do users actually interact with this component - directly or through higher-level operations?"
+          - "Question: What triggers the creation/modification of the affected resources in real scenarios?"
+          - "Question: Is this a direct user action or part of a larger automated workflow?"
+          - "Map technical components mentioned in JIRA to actual user-facing operations and workflows"
+          - "Distinguish between internal system components and user-accessible APIs/resources"
+          - "Identify realistic user scenarios that would naturally expose this bug in production"
+          - "Define end-to-end testing scope rather than isolated component testing"
+      "Option B - Local Repository NOT Available":
+        "Technical Implementation Analysis":
+          - "Primary: Use DeepWiki MCP (analyzes project code, ~1 week lag)"
+          - "Secondary: Use JIRA links to GitHub for specific files"
+        "Architecture Understanding Tasks":
+          - "Use DeepWiki MCP to understand component architecture and its role in the overall system"
+          - "Identify how the JIRA component fits into user workflows and system interactions"
+          - "Determine what user actions or system operations would naturally trigger the reported issue"
+          - "Question: How do users actually interact with this component - directly or through higher-level operations?"
+          - "Question: What triggers the creation/modification of the affected resources in real scenarios?"
+          - "Question: Is this a direct user action or part of a larger automated workflow?"
+          - "Map technical components mentioned in JIRA to actual user-facing operations and workflows"
+          - "Distinguish between internal system components and user-accessible APIs/resources"
+          - "Identify realistic user scenarios that would naturally expose this bug in production"
+          - "Define end-to-end testing scope rather than isolated component testing"
+
+"Universal Test Coverage Strategy":
+  - "Primary Focus: End-to-end user workflows that naturally exercise the component"
+  - "Secondary: Component integration scenarios within larger operations"
+  - "Happy Path: Complete user workflow scenarios"
+  - "Edge Cases: Boundary conditions in realistic usage"
+  - "Error Scenarios: Failure handling in user-initiated operations"
+  - "Integration: Multi-component workflows and dependencies"
+  - "Recovery Scenarios: Test transition from any error state back to healthy state"
+
+"Test Step Quality Framework":
+  - "Workflow-Driven: Test complete user operations, not isolated component actions"
+  - "Realistic Scenarios: Use authentic user interaction patterns"
+  - "Measurable Results: Use specific, quantifiable expected results"
+  - "Executable Commands: Provide exact commands that users would actually execute"
+  - "AVOID: Direct manipulation of internal/auto-generated resources"
+  - "PREFER: User-initiated operations that trigger component behavior"
+
+"Universal Quantitative Validation Framework":
+  - "Every technical problem must have measurable validation"
+  - "Define specific numerical thresholds for pass/fail criteria"
+  - "Include time-based measurements for any performance/behavior issues"
+  - "Use comparison validation for any consistency problems"
+  - "Measure frequency/rate for any excessive behavior issues"
+  - "Include progression validation for any stuck/blocking issues"
+
+"Platform-Agnostic Command Standards":
+  - "Environment-Appropriate: Use platform-specific CLI tools (oc, kubectl, etc.)"
+  - "Realistic Naming: Use environment-appropriate namespace and resource conventions"
+  - "Executable Commands: Provide commands that work in actual deployment environments"
+  - "Resource Monitoring: Include metadata tracking (resourceVersion, generation, timestamps)"
+  - "Log Analysis: Use log patterns appropriate to the component being tested"
+  - "Pattern Matching: Include validation patterns appropriate to the problem type"
+
+"Project-Specific Test Environment Requirements":
+  - "Configure based on project needs: Define specific test environment requirements"
+
+"VALIDATION PATTERN SELECTION (MANDATORY )":
+  "CRITICAL RULE":
+    "WARNING: Pattern Overuse Prevention":
+      - "FORBIDDEN: Applying multiple patterns to the same issue"
+      - "FORBIDDEN: Creating 3+ test cases for a single root cause"
+      - "REQUIRED: Choose the ONE most direct pattern for the root cause"
+
+"Generic Technical Validation Patterns (USE ONLY IF CORE PATTERNS DON'T MATCH)":
+  "Pattern A: Stability Validation":
+    "When to use": "Any \"changing/inconsistent/varying behavior\" problems"
+    "Method": "Capture same measurement multiple times, verify identical results"
+    "Implementation": "Compare values across time/iterations"
+  "Pattern B: Frequency Validation":
+    "When to use": "Any \"too frequent/too many/excessive behavior\" problems"
+    "Method": "Count occurrences over time window, compare against threshold"
+    "Implementation": "Measure rate/frequency with specific thresholds"
+    "Caution": "Usually secondary symptom - find the root cause instead"
+  "Pattern C: State Validation":
+    "When to use": "Any \"incorrect state/status/condition\" problems"
+    "Method": "Compare actual vs expected state with specific criteria"
+    "Implementation": "Query current state, verify matches expected criteria"
+  "Pattern D: Absence Validation":
+    "When to use": "Any \"unwanted content/behavior/occurrence\" problems"
+    "Method": "Search for unwanted element, confirm not found"
+    "Implementation": "Pattern matching to verify problematic content is absent"
+  "Pattern E: Progression Validation":
+    "When to use": "Any \"stuck/not progressing/not completing\" problems"
+    "Method": "Monitor state transitions, confirm expected progression"
+    "Implementation": "Track state changes over time with timeouts"

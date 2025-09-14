@@ -1,0 +1,152 @@
+test_strategy:
+  jira_issue_key: HIVE-2302
+  component: hive
+
+  core_problem:
+    root_cause: "Complex field-by-field plumbing required for metadata passing from provision to deprovision"
+    validation_pattern: "Pattern C: State Validation + Pattern D: Absence Validation"
+    validation_approach: "Verify metadata.json Secret exists and deprovision completes cleanly without resource leaks"
+
+  test_coverage_matrix:
+    test_types:
+      - type: "E2E"
+        scenarios:
+          - "Modern cluster (AWS) provision and deprovision"
+          - "All platforms regression (no resource leaks)"
+
+      - type: "Manual"
+        scenarios:
+          - "Legacy cluster retrofit and deprovision"
+          - "AWS HostedZoneRole (shared VPC)"
+          - "GCP NetworkProjectID (shared VPC)"
+          - "Azure ResourceGroupName (existing RG)"
+          - "vSphere pre-zonal and post-zonal"
+
+    platforms:
+      - platform: AWS
+        scenarios:
+          - standard_provision_deprovision: "E2E"
+          - legacy_retrofit: "Manual"
+          - shared_vpc_hostedzonerole: "Manual"
+
+      - platform: Azure
+        scenarios:
+          - standard_provision_deprovision: "E2E"
+          - legacy_retrofit: "Manual"
+          - existing_resource_group: "Manual"
+
+      - platform: GCP
+        scenarios:
+          - standard_provision_deprovision: "E2E"
+          - legacy_retrofit: "Manual"
+          - shared_vpc_networkprojectid: "Manual"
+
+      - platform: vSphere
+        scenarios:
+          - standard_provision_deprovision: "E2E"
+          - pre_zonal_retrofit: "Manual"
+          - post_zonal_retrofit: "Manual"
+
+  validation_methods:
+    primary_validation:
+      - method: "metadata.json Secret existence"
+        command_pattern: "oc get secret -o jsonpath"
+        success_criteria: "Secret {clustername}-metadata-json exists"
+
+      - method: "SecretRef field validation"
+        command_pattern: "oc get clusterdeployment -o jsonpath"
+        success_criteria: "ClusterMetadata.MetadataJSONSecretRef.Name matches Secret name"
+
+      - method: "metadata.json content verification"
+        command_pattern: "oc get secret -o jsonpath | base64 -d"
+        success_criteria: "Valid JSON with infraID and platform fields"
+
+      - method: "Deprovision completion"
+        command_pattern: "oc get clusterdeprovision -o jsonpath"
+        success_criteria: "ClusterDeprovision reaches Completed status"
+
+      - method: "Resource leak detection"
+        command_pattern: "Cloud provider CLI (aws/az/gcloud)"
+        success_criteria: "Zero resources with cluster infraID tag/label remain"
+
+    legacy_validation:
+      - method: "Retrofit Secret generation"
+        success_criteria: "Secret created from ClusterProvision or ClusterDeployment.Spec.ClusterMetadata"
+
+      - method: "Legacy deprovision annotation"
+        success_criteria: "Annotation hive.openshift.io/legacy-deprovision: 'true' triggers legacy code path"
+
+  test_execution_strategy:
+    setup:
+      - "Prepare Hive management cluster"
+      - "Configure cloud provider credentials"
+      - "For legacy tests: prepare clusters created before HIVE-2302"
+
+    execution:
+      - "Create ClusterDeployment (modern scenario)"
+      - "Verify metadata.json Secret creation"
+      - "Verify SecretRef field populated"
+      - "Delete ClusterDeployment to trigger deprovision"
+      - "Monitor ClusterDeprovision status"
+      - "Verify complete resource cleanup"
+
+    validation:
+      - "State: Secret exists with correct name and content"
+      - "State: SecretRef field correctly populated"
+      - "Progression: Deprovision completes successfully"
+      - "Absence: No cloud resources remain (leak check)"
+
+  edge_cases:
+    - case: "Legacy cluster without ClusterProvision"
+      scenario: "Cluster created before ClusterProvision.Spec.MetadataJSON existed"
+      expected: "Secret retrofitted from ClusterDeployment.Spec.ClusterMetadata"
+
+    - case: "vSphere credential scrubbing and re-injection"
+      scenario: "metadata.json has credentials removed, must be re-injected at deprovision"
+      expected: "Credentials from env vars injected correctly"
+
+    - case: "Secret already exists"
+      scenario: "User manually created or hive already retrofitted Secret"
+      expected: "Existing Secret not overwritten"
+
+    - case: "Platform-specific fields validation"
+      scenario: "HostedZoneRole, NetworkProjectID, ResourceGroupName preserved"
+      expected: "Fields in metadata.json Secret match original values"
+
+  quantitative_thresholds:
+    - metric: "Secret creation time"
+      threshold: "< 5 seconds after provision completes"
+
+    - metric: "Deprovision completion time"
+      threshold: "< 30 minutes (varies by platform)"
+
+    - metric: "Resource leak count"
+      threshold: "Exactly 0 resources remain"
+
+    - metric: "Retrofit success rate"
+      threshold: "100% of legacy clusters get Secret"
+
+  test_classification_rationale:
+    e2e_tests:
+      - "Standard provision/deprovision flow (modern clusters)"
+      - "All platforms regression testing (no leaks)"
+
+    manual_tests:
+      - "Legacy/retrofit scenarios (requires pre-existing clusters or version control)"
+      - "AWS HostedZoneRole (requires shared VPC setup)"
+      - "GCP NetworkProjectID (requires shared VPC setup)"
+      - "Azure ResourceGroupName (requires pre-created resource group)"
+      - "vSphere pre-zonal/post-zonal (requires specific releases)"
+
+  mandatory_rule_compliance:
+    keywords_detected:
+      - "retrofit": true
+      - "legacy": true
+      - "HostedZoneRole": true
+      - "NetworkProjectID": true
+      - "ResourceGroupName": true
+
+    classification_decision:
+      - "Modern provision/deprovision: E2E (no special setup required)"
+      - "Legacy/retrofit scenarios: Manual (requires upgrade/version control)"
+      - "Platform-specific fields: Manual (requires special infrastructure)"

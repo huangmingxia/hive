@@ -1,0 +1,106 @@
+# ======================================
+# Agent: E2E Test Generation OpenShift Private
+# ======================================
+
+agent:
+  name: "e2e_test_generation_openshift_private"
+  display_name: "E2E Test Generation for OpenShift Private"
+  description: "Generate E2E test code for OpenShift private repositories"
+
+role:
+  title: "OpenShift QE"
+  specialization: "E2E test generation for private OpenShift repositories"
+
+task:
+  primary_goal: "Orchestrate E2E test generation using specialized agents"
+
+  steps:
+    # STEP 1: Validation Phase
+    - "Execute config/agents/e2e_validation_agent.yaml for {jira_issue_key} to validate existing tests"
+    - "Check prerequisite test case exists before proceeding"
+
+    # STEP 2: Repository Setup
+    - "Execute config/agents/repository_setup_agent for {jira_issue_key} to setup repository environment"
+    - "Ensure openshift-tests-private repository is properly configured"
+
+    # STEP 2.5: Platform Detection (MANDATORY)
+    - "MANDATORY: Read test_artifacts/{COMPONENT}/{jira_issue_key}/test_cases/{jira_issue_key}_e2e_test_case.md"
+    - "MANDATORY: Scan ALL test case names to detect which platforms are included:"
+    - "  - If test name contains 'AWS' → add AWS to platform list"
+    - "  - If test name contains 'Azure' → add Azure to platform list"
+    - "  - If test name contains 'GCP' → add GCP to platform list"
+    - "  - If test name contains 'VSphere' or 'vSphere' → add VSphere to platform list"
+    - "MANDATORY: Create complete list of ALL detected platforms"
+    - "MANDATORY: Log detected platforms: 'Detected platforms: [AWS, Azure, GCP, VSphere]'"
+
+    # STEP 3: Parallel Code Generation for ALL Detected Platforms (MANDATORY)
+    - "CRITICAL: Execute config/agents/e2e_code_generation_agent for EACH platform in the detected list"
+    - "CRITICAL: Use separate tool calls in the SAME tool call batch for true parallel execution"
+    - "CRITICAL: Each tool call MUST include platform parameter (platform=AWS, platform=Azure, etc.)"
+    - "CRITICAL: Do NOT stop after generating one platform - ALL platforms must be processed"
+    - "MANDATORY: Verify ALL detected platforms have been processed before proceeding to quality check"
+
+    # STEP 4: Quality Validation
+    - "Execute config/agents/e2e_quality_check_agent for {jira_issue_key} to validate generated code"
+    - "Ensure generated code compiles and meets quality standards"
+
+input:
+  required:
+    - name: "jira_issue_key"
+      type: "string"
+      description: "JIRA issue key (e.g., HIVE-2883)"
+      example: "HIVE-2883"
+
+output:
+  files:
+    - name: "{jira_issue_key}_openshift_private_e2e_results.md"
+      path: "test_artifacts/{COMPONENT}/{jira_issue_key}/phases/{jira_issue_key}_openshift_private_e2e_results.md"
+      format: "markdown"
+      description: "E2E test generation results and code integration status"
+
+tools:
+  - name: "File operations"
+    description: "Read test cases and write E2E test code"
+  - name: "Bash"
+    description: "Execute repository setup and compilation commands"
+  - name: "DeepWiki MCP"
+    description: "You can use this tool to get architecture understanding of the component"
+
+configuration:
+  dynamic_variables:
+    - "{COMPONENT}"
+    - "{jira_issue_key}"
+  template_replacement: true
+  template_enforcement: "strict"
+
+  performance_optimization:
+    target_execution_time: "5 minutes"
+    balance: "Quality over speed - generate comprehensive E2E tests"
+    critical_performance_rules:
+      parallel_execution_mandatory:
+        - "Execute validation and setup in parallel where possible"
+      fast_mode_default:
+        - "Streamlined code generation for standard patterns"
+        - "Use existing templates and patterns"
+      execution_strategies:
+        - "Validate first, then setup repository"
+        - "Generate code following openshift-tests-private patterns"
+        - "Quality check ensures compilation and standards compliance"
+    performance_targets:
+      - "Step 1 (Validation): 10 seconds"
+      - "Step 2 (Setup): 10 seconds"
+      - "Step 3 (Generation): 2 minutes"
+      - "Step 4 (Quality Check): 2 minutes"
+    output_efficiency:
+      - "Generate complete E2E test files integrated into repository"
+      - "Include proper test selectors and metadata"
+      - "Ensure RFC 1123 compliance for resource naming"
+
+content_limits:
+  maximum_size: "15KB"
+  style_guidelines:
+    - "Generate E2E test code following openshift-tests-private patterns"
+    - "Use Ginkgo test framework structure"
+    - "Include appropriate test selectors and metadata"
+    - "Ensure test logic focuses on end-to-end workflows"
+  

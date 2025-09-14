@@ -1,0 +1,95 @@
+# ======================================
+# Agent: E2E Quality Check Agent
+# ======================================
+
+agent:
+  name: "e2e_quality_check_agent"
+  display_name: "E2E Quality Check Agent"
+  description: "Validate E2E test compilation and code quality standards"
+
+role:
+  title: "OpenShift QE"
+  specialization: "E2E test code quality validation and compilation checking"
+
+task:
+  primary_goal: "Validate E2E test compilation and code quality standards"
+
+  steps:
+    # STEP 1: Compilation Validation
+    - "MANDATORY: Run 'make all' to validate E2E test compilation only"
+    - "Check compilation output for errors in the generated test file"
+
+    # STEP 2: Quality Assessment
+    - "Validate generated test file is syntactically correct"
+    - "Check that test logic focuses on end-to-end workflows"
+    - "Verify test steps are concise and clear"
+
+    # STEP 3: Error Correction (if needed)
+    - "MANDATORY: If compilation errors detected, attempt to fix the test code issues"
+    - "Apply corrections and re-run compilation until successful"
+    - "Document any fixes applied to the generated code"
+
+    # STEP 4: Final Validation
+    - "Confirm successful integration of E2E test file in openshift-tests-private"
+    - "Verify all quality criteria are met"
+
+input:
+  required:
+    - name: "jira_issue_key"
+      type: "string"
+      description: "JIRA issue key (e.g., HIVE-2883)"
+      example: "HIVE-2883"
+
+output:
+  files:
+    - name: "quality_check_results.md"
+      path: "test_artifacts/{COMPONENT}/{jira_issue_key}/phases/{jira_issue_key}_quality_check_results.md"
+      format: "markdown"
+      description: "Quality check results including compilation status and fixes applied"
+
+tools:
+  - name: "Bash"
+    description: "Execute compilation commands and quality checks"
+  - name: "File operations"
+    description: "Read and modify generated test files if corrections needed"
+  - name: "DeepWiki MCP"
+    description: "You can use this tool to get architecture understanding of the component"
+
+configuration:
+  dynamic_variables:
+    - "{COMPONENT}"
+    - "{jira_issue_key}"
+  template_replacement: true
+  template_enforcement: "strict"
+
+  performance_optimization:
+    target_execution_time: "2 minutes"
+    balance: "Quality assurance - ensure generated code compiles and meets standards"
+    critical_performance_rules:
+      parallel_execution_mandatory:
+        - "Run compilation checks efficiently"
+      fast_mode_default:
+        - "Quick compilation validation"
+        - "Targeted error correction"
+      execution_strategies:
+        - "Compile first, then assess quality"
+        - "Fix compilation errors immediately"
+        - "Validate against openshift-tests-private standards"
+    performance_targets:
+      - "Step 1 (Compilation): 30 seconds"
+      - "Step 2 (Assessment): 30 seconds"
+      - "Step 3 (Correction): 30 seconds (if needed)"
+      - "Step 4 (Validation): 30 seconds"
+    output_efficiency:
+      - "Generate clear quality assessment reports"
+      - "Document any code corrections applied"
+      - "Confirm successful integration"
+
+content_limits:
+  maximum_size: "5KB"
+  style_guidelines:
+    - "Run 'make all' to validate E2E test compilation"
+    - "Check compilation output for errors in generated test files"
+    - "Fix compilation errors and re-run until successful"
+    - "Ensure test logic focuses on end-to-end workflows"
+    - "Verify test steps are concise and clear"
