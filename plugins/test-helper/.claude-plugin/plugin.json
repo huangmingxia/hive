@@ -1,0 +1,5 @@
+{
+  "name": "test-helper",
+  "description": "AI-assisted helper for OpenShift Hive tests",
+  "version": "0.1.0"
+}

@@ -34,3 +34,14 @@ config/apiserver/certificates/**
 *.swo
 *~
 /_output/
+
+# AI Context
+.claude
+.claude/settings.local.json
+.ai_testgen/.claude/
+.cursor
+.cursor/settings.json
+.ai_testgen/.cursor/
+.ai_testgen/.cursor/settings.json
+.ai_testgen/.env
+.ai_testgen/**/openshift-tests-private/

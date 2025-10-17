@@ -1,0 +1,18 @@
+{
+  "name": "hive",
+  "owner": {
+    "name": "openshift"
+  },
+  "plugins": [
+    {
+      "name": "hive-helper",
+      "source": "./plugins/hive-helper",
+      "description": "AI-assisted helper for OpenShift Hive"
+    },
+    {
+      "name": "test-helper",
+      "source": "./plugins/test-helper",
+      "description": "AI-assisted test helper for OpenShift Hive"
+    }
+  ]
+}
