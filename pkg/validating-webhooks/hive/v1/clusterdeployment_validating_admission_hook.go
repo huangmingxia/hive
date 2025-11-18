@@ -318,7 +318,7 @@ func (a *ClusterDeploymentValidatingAdmissionHook) validateCreate(admissionSpec 
 		}
 	}
 
-	allErrs = append(allErrs, validateClusterPlatform(specPath.Child("platform"), cd.Spec.Platform)...)
+	allErrs = append(allErrs, validateClusterPlatform(specPath.Child("platform"), cd.Spec.Platform, cd.Spec.ManageDNS)...)
 	allErrs = append(allErrs, validateCanManageDNSForClusterPlatform(specPath, cd.Spec)...)
 
 	if cd.Spec.Platform.AWS != nil {
@@ -470,7 +470,7 @@ func validatefeatureGates(decoder admission.Decoder, admissionSpec *admissionv1b
 	return nil
 }
 
-func validateClusterPlatform(path *field.Path, platform hivev1.Platform) field.ErrorList {
+func validateClusterPlatform(path *field.Path, platform hivev1.Platform, manageDNS bool) field.ErrorList {
 	allErrs := field.ErrorList{}
 	numberOfPlatforms := 0
 	if aws := platform.AWS; aws != nil {
@@ -495,7 +495,7 @@ func validateClusterPlatform(path *field.Path, platform hivev1.Platform) field.E
 		if azure.Region == "" {
 			allErrs = append(allErrs, field.Required(azurePath.Child("region"), "must specify Azure region"))
 		}
-		if azure.BaseDomainResourceGroupName == "" {
+		if manageDNS && azure.BaseDomainResourceGroupName == "" {
 			allErrs = append(allErrs, field.Required(azurePath.Child("baseDomainResourceGroupName"), "must specify the Azure resource group for the base domain"))
 		}
 	}

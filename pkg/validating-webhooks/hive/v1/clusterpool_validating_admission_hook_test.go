@@ -180,14 +180,14 @@ func TestClusterPoolValidate(t *testing.T) {
 			expectedAllowed: false,
 		},
 		{
-			name: "Azure create missing baseDomainResourceGroupName",
+			name: "Azure create missing baseDomainResourceGroupName (ClusterPool doesn't require BDRG)",
 			newObject: func() *hivev1.ClusterPool {
-				cd := validAzureClusterPool()
-				cd.Spec.Platform.Azure.BaseDomainResourceGroupName = ""
-				return cd
+				cp := validAzureClusterPool()
+				cp.Spec.Platform.Azure.BaseDomainResourceGroupName = ""
+				return cp
 			}(),
 			operation:       admissionv1beta1.Create,
-			expectedAllowed: false,
+			expectedAllowed: true,
 		},
 		{
 			name: "create with two cloud platforms",

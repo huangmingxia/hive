@@ -832,9 +832,20 @@ func TestClusterDeploymentValidate(t *testing.T) {
 			expectedAllowed: false,
 		},
 		{
-			name: "Azure create missing baseDomainResourceGroupName",
+			name: "Azure create missing baseDomainResourceGroupName without manageDNS",
 			newObject: func() *hivev1.ClusterDeployment {
 				cd := validAzureClusterDeployment()
+				cd.Spec.Platform.Azure.BaseDomainResourceGroupName = ""
+				return cd
+			}(),
+			operation:       admissionv1beta1.Create,
+			expectedAllowed: true,
+		},
+		{
+			name: "Azure create missing baseDomainResourceGroupName with manageDNS",
+			newObject: func() *hivev1.ClusterDeployment {
+				cd := validAzureClusterDeployment()
+				cd.Spec.ManageDNS = true
 				cd.Spec.Platform.Azure.BaseDomainResourceGroupName = ""
 				return cd
 			}(),
