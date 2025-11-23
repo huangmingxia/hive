@@ -394,6 +394,12 @@ func (c *Client) GetVPCZonesForRegion(ctx context.Context, region string) ([]str
 	_, cancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer cancel()
 
+	// Set the VPC service URL for the specific region before listing zones
+	err := c.setVPCServiceURLForRegion(ctx, region)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to set vpc service url for region %s", region)
+	}
+
 	regionZonesOptions := c.vpcAPI.NewListRegionZonesOptions(region)
 	zones, _, err := c.vpcAPI.ListRegionZonesWithContext(ctx, regionZonesOptions)
 	if err != nil {
